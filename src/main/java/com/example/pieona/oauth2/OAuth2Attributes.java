@@ -1,5 +1,6 @@
 package com.example.pieona.oauth2;
 
+import com.example.pieona.entity.User;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.Builder;
 import lombok.Getter;
@@ -51,21 +52,25 @@ public class OAuth2Attributes {
         return null;
     }
 
+
     @SuppressWarnings("uncheked")
     private static OAuth2Attributes ofKakao(String userNameAttributeName, Map<String, Object> attributes){
         // kakao는 kakao_account에 유저정보가 있다. (email)
-        Map<String, Object> kakaoAccount = (Map<String, Object>) attributes.get("kakao_account");
+        Map<String, Object> account = (Map<String, Object>) attributes.get("kakao_account");
         // kakao_account 안에 또 profile 이라는 JSON 객체가 있다. (nickname, profile_image)
-        Map<String, Object> kakaoProfile = (Map<String, Object>) kakaoAccount.get("profile");
+        Map<String, Object> profile = (Map<String, Object>) account.get("profile");
 
         return OAuth2Attributes.builder()
-                .nickname((String) kakaoProfile.get("nickname"))
-                .memId((String) kakaoAccount.get("email"))
-                .gender((String) kakaoAccount.get("gender"))
-                .image((String) kakaoProfile.get("image"))
+                .oauthId(attributes.get(userNameAttributeName).toString())
+                .nickname((String) profile.get("nickname"))
+                .memId((String) account.get("email"))
+                .gender((String) account.get("gender"))
+                .image((String) profile.get("image"))
+                .provider(Provider.KAKAO)
                 .attributes(attributes)
                 .nameAttributeKey(userNameAttributeName)
                 .build();
     }
+
 
 }

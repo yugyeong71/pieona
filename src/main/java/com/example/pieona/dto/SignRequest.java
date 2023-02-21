@@ -1,6 +1,8 @@
 package com.example.pieona.dto;
 
 import com.example.pieona.oauth2.Role;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Pattern;
 import lombok.*;
 
 @Getter @Setter
@@ -26,5 +28,7 @@ public class SignRequest {
     private boolean isOn;
 
     private Role role;
+
+
 
 }

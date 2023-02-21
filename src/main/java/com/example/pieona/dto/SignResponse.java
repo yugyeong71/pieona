@@ -14,33 +14,27 @@ import java.util.List;
 @NoArgsConstructor @AllArgsConstructor
 public class SignResponse {
 
-    private Long id;
+    //private Long id;
 
-    private String nickname;
+    //private String nickname;
 
     private String memId;
 
-    private String memPw;
+    //private String memPw;
 
     private String gender;
 
-    private String image;
+    //private String image;
 
-    private String type;
+    //private String type;
 
-    private String content;
+    //private String content;
 
-    private boolean isOn;
+    //private boolean isOn;
 
-    private List<Authority> roles = new ArrayList<>();
+    //private List<Authority> roles = new ArrayList<>();
 
     private TokenDto token;
 
-    public SignResponse(User user) {
-        this.id = user.getId();
-        this.memId = user.getMemId();
-        this.nickname = user.getNickname();
-        this.roles = user.getRoles();
-    }
 
 }

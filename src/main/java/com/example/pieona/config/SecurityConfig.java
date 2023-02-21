@@ -45,6 +45,7 @@ public class SecurityConfig {
 
     private final OAuth2AuthenticationFailureHandler oAuth2AuthenticationFailureHandler;
 
+
     @Bean
     PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
@@ -53,11 +54,9 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception{
         http
-                // ID, Password 문자열을 Base64로 인코딩하여 전달하는 구조
-                .httpBasic().disable()
-                .formLogin().disable()
-                // 쿠키 기반이 아닌 JWT 기반이므로 사용하지 않음
-                .csrf().disable()
+                .httpBasic().disable() // ID, Password 문자열을 Base64로 인코딩하여 전달하는 구조
+                .formLogin().disable() // 로그인 폼 미사용
+                .csrf().disable() // 쿠키 기반이 아닌 JWT 기반이므로 사용하지 않음
                 .cors(
                         c -> {
                             CorsConfigurationSource source = request -> {
@@ -81,7 +80,7 @@ public class SecurityConfig {
                 // 조건별로 요청 허용/제한 설정
                 .authorizeRequests()
                 // 회원가입과 로그인은 모두 승인
-                .requestMatchers("/signup", "/login", "/social", "/refresh").permitAll()
+                .requestMatchers("/signup", "/login", "/social", "/refresh", "/auth/**", "/oauth2/**").permitAll()
                 // /admin으로 시작하는 요청은 ADMIN 권한이 있는 유저에게만 허용
                 .requestMatchers("/admin/**").hasRole("ADMIN")
                 // /user 로 시작하는 요청은 USER 권한이 있는 유저에게만 허용
@@ -92,6 +91,8 @@ public class SecurityConfig {
                 .userInfoEndpoint()
                 .oidcUserService(customOidcUserService)
                 .userService(customOAuth2UserService)
+                .and()
+                .redirectionEndpoint().baseUri("/oauth2/code/*")
                 .and()
                 .successHandler(oAuth2AuthenticationSuccessHandler)
                 .failureHandler(oAuth2AuthenticationFailureHandler)

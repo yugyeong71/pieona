@@ -1,6 +1,5 @@
 package com.example.pieona.entity;
 
-import com.example.pieona.oauth2.Role;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -50,4 +49,5 @@ public class User {
     public void setRefreshToken(String refreshToken){
         this.refreshToken = refreshToken;
     }
+
 }

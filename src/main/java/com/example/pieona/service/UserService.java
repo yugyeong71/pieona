@@ -14,12 +14,14 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Collections;
 import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
+@Transactional
 public class UserService{
 
     private final UserRepository userRepository;
@@ -39,20 +41,11 @@ public class UserService{
 
         user.setRefreshToken(createRefreshToken(user));
 
-        /*return SignResponse.builder()
-                .id(user.getId())
-                .memId(user.getMemId())
-                .nickname(user.getNickname())
-                .image(user.getImage())
-                .gender(user.getGender())
-                .roles(user.getRoles())
-                .token(TokenDto.builder()
-                        .access_token(jwtProvider.createToken(user.getMemId(), user.getRoles()))
-                        .refresh_token(user.getRefreshToken())
-                        .build())
-                .build();*/
-
         return SignResponse.builder()
+                //.memId(user.getMemId())
+                //.nickname(user.getNickname())
+                //.image(user.getImage())
+                //.gender(user.getGender())
                 .token(TokenDto.builder()
                         .access_token(jwtProvider.createToken(user.getMemId(), user.getRoles()))
                         .refresh_token(user.getRefreshToken())
@@ -65,6 +58,9 @@ public class UserService{
             User user = User.builder()
                     .memId(request.getMemId())
                     .memPw(passwordEncoder.encode(request.getMemPw()))
+                    .nickname(request.getNickname())
+                    .image(request.getImage())
+                    .gender(request.getGender())
                     .build();
 
             user.setRoles(Collections.singletonList(Authority.builder().name("ROLE_USER").build()));

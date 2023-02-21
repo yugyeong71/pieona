@@ -5,9 +5,7 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
 import java.util.stream.Collectors;
 
 // User에 바로 상속해도 되지만 엔티티가 오염되어 향후 User 엔티티를 사용하기 어려워지기 때문에 CustomUsetDetails를 따로 만들어줬다.
