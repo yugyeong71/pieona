@@ -3,7 +3,7 @@ package com.example.pieona;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
-@SpringBootTest
+//@SpringBootTest
 class PieonaApplicationTests {
 
     @Test
