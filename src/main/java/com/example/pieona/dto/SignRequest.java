@@ -11,9 +11,9 @@ public class SignRequest {
 
     private Long id;
 
-    private String memId;
+    private String email;
 
-    private String memPw;
+    private String password;
 
     private String nickname;
 
@@ -21,14 +21,10 @@ public class SignRequest {
 
     private String image;
 
-    private String type;
-
     private String content;
 
     private boolean isOn;
 
     private Role role;
-
-
 
 }

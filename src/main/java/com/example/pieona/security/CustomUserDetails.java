@@ -30,12 +30,12 @@ public class CustomUserDetails implements UserDetails { // UserDetails를 상속
 
     @Override
     public String getPassword() {
-        return user.getMemPw();
+        return user.getPassword();
     }
 
     @Override
     public String getUsername() {
-        return user.getMemId();
+        return user.getEmail();
     }
 
     @Override

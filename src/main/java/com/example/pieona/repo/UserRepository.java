@@ -10,6 +10,6 @@ import java.util.Optional;
 @Transactional
 public interface UserRepository extends JpaRepository<User, Long> {
 
-    Optional<User> findByMemId(String memId); // 사용자 조회
+    Optional<User> findByEmail(String email); // 사용자 조회
 
 }

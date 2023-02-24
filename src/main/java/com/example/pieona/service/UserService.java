@@ -33,21 +33,19 @@ public class UserService{
     private final TokenRepository tokenRepository;
 
     public SignResponse login(SignRequest request) {
-        User user = userRepository.findByMemId(request.getMemId()).orElseThrow(() -> new BadCredentialsException("잘못된 정보입니다."));
+        User user = userRepository.findByEmail(request.getEmail()).orElseThrow(() -> new BadCredentialsException("잘못된 정보입니다."));
 
-        if(!passwordEncoder.matches(request.getMemPw(), user.getMemPw())){
+        if(!passwordEncoder.matches(request.getPassword(), user.getPassword())){
             throw new BadCredentialsException("잘못된 정보입니다.");
         }
 
         user.setRefreshToken(createRefreshToken(user));
 
         return SignResponse.builder()
-                //.memId(user.getMemId())
-                //.nickname(user.getNickname())
-                //.image(user.getImage())
-                //.gender(user.getGender())
+                .email(user.getEmail())
+                .gender(user.getGender())
                 .token(TokenDto.builder()
-                        .access_token(jwtProvider.createToken(user.getMemId(), user.getRoles()))
+                        .access_token(jwtProvider.createToken(user.getEmail(), user.getRoles()))
                         .refresh_token(user.getRefreshToken())
                         .build())
                 .build();
@@ -56,8 +54,8 @@ public class UserService{
     public SuccessMessage signUp(SignRequest request) throws Exception{
         try{
             User user = User.builder()
-                    .memId(request.getMemId())
-                    .memPw(passwordEncoder.encode(request.getMemPw()))
+                    .email(request.getEmail())
+                    .password(passwordEncoder.encode(request.getPassword()))
                     .nickname(request.getNickname())
                     .image(request.getImage())
                     .gender(request.getGender())
@@ -118,14 +116,14 @@ public class UserService{
 
     public TokenDto refreshAccessToken(TokenDto token) throws Exception{
 
-        String memId = jwtProvider.getMemId(token.getAccess_token());
-        User user = userRepository.findByMemId(memId).orElseThrow(() ->
+        String email = jwtProvider.getMemId(token.getAccess_token());
+        User user = userRepository.findByEmail(email).orElseThrow(() ->
                 new BadCredentialsException("잘못된 계정 정보입니다."));
         Token refreshToken = vaildRefreshToken(user, token.getRefresh_token());
 
         if(refreshToken != null){
             return TokenDto.builder()
-                    .access_token(jwtProvider.createToken(memId, user.getRoles()))
+                    .access_token(jwtProvider.createToken(email, user.getRoles()))
                     .refresh_token(refreshToken.getRefresh_token())
                     .build();
         }else {

@@ -19,7 +19,7 @@ public class OAuth2Attributes {
 
     private String nickname;
 
-    private String memId;
+    private String email;
 
     private Provider provider;
 
@@ -30,12 +30,12 @@ public class OAuth2Attributes {
     private String image;
 
     @Builder
-    public OAuth2Attributes(Map<String, Object> attributes, String nameAttributeKey, String oauthId, String nickname, String memId, String gender, String image, Provider provider){
+    public OAuth2Attributes(Map<String, Object> attributes, String nameAttributeKey, String oauthId, String nickname, String email, String gender, String image, Provider provider){
         this.attributes = attributes;
         this.nameAttributeKey = nameAttributeKey;
         this.oauthId = oauthId;
         this.nickname = nickname;
-        this.memId = memId;
+        this.email = email;
         this.gender = gender;
         this.image = image;
         this.provider = provider;
@@ -63,7 +63,7 @@ public class OAuth2Attributes {
         return OAuth2Attributes.builder()
                 .oauthId(attributes.get(userNameAttributeName).toString())
                 .nickname((String) profile.get("nickname"))
-                .memId((String) account.get("email"))
+                .email((String) account.get("email"))
                 .gender((String) account.get("gender"))
                 .image((String) profile.get("image"))
                 .provider(Provider.KAKAO)

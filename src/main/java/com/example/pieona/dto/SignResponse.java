@@ -18,15 +18,13 @@ public class SignResponse {
 
     //private String nickname;
 
-    private String memId;
+    private String email;
 
-    //private String memPw;
+    //private String password;
 
     private String gender;
 
     //private String image;
-
-    //private String type;
 
     //private String content;
 

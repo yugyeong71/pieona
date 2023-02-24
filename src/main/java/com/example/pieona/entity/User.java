@@ -21,15 +21,13 @@ public class User {
     private String nickname;
 
     @Column(unique = true)
-    private String memId;
+    private String email;
 
-    private String memPw;
+    private String password;
 
     private String gender;
 
     private String image;
-
-    private String type;
 
     private String content;
 
