@@ -32,4 +32,9 @@ public class UserController {
         return new ResponseEntity<>(userService.refreshAccessToken(token), HttpStatus.OK);
     }
 
+    @GetMapping("/")
+    public String test(){
+        return "test";
+    }
+
 }
