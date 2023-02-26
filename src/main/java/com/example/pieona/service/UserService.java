@@ -72,6 +72,14 @@ public class UserService{
         return new SuccessMessage();
     }
 
+    public boolean existEmail(String email){
+        return userRepository.existsByEmail(email);
+    }
+
+    public boolean existNickname(String nickname){
+        return userRepository.existsByNickname(nickname);
+    }
+
 
     /*
         Refresh Token
