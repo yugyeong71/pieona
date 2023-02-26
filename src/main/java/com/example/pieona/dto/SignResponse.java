@@ -14,23 +14,9 @@ import java.util.List;
 @NoArgsConstructor @AllArgsConstructor
 public class SignResponse {
 
-    //private Long id;
-
-    //private String nickname;
-
     private String email;
 
-    //private String password;
-
     private String gender;
-
-    //private String image;
-
-    //private String content;
-
-    //private boolean isOn;
-
-    //private List<Authority> roles = new ArrayList<>();
 
     private TokenDto token;
 

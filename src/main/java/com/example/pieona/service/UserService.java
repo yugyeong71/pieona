@@ -1,6 +1,7 @@
 package com.example.pieona.service;
 
 import com.example.pieona.common.SuccessMessage;
+import com.example.pieona.dto.ListUser;
 import com.example.pieona.dto.SignRequest;
 import com.example.pieona.dto.SignResponse;
 import com.example.pieona.dto.TokenDto;
@@ -78,6 +79,19 @@ public class UserService{
 
     public boolean existNickname(String nickname){
         return userRepository.existsByNickname(nickname);
+    }
+
+    public ListUser listUser(ListUser listUser){
+
+        User user = userRepository.findByEmail(listUser.getEmail()).orElseThrow(() -> new BadCredentialsException("잘못된 정보입니다."));
+
+        return ListUser.builder()
+                .id(user.getId())
+                .nickname(user.getNickname())
+                .email(user.getEmail())
+                .gender(user.getGender())
+                .image(user.getImage())
+                .build();
     }
 
 

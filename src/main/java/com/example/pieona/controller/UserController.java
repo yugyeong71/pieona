@@ -1,6 +1,7 @@
 package com.example.pieona.controller;
 
 import com.example.pieona.common.SuccessMessage;
+import com.example.pieona.dto.ListUser;
 import com.example.pieona.dto.SignRequest;
 import com.example.pieona.dto.SignResponse;
 import com.example.pieona.dto.TokenDto;
@@ -38,6 +39,11 @@ public class UserController {
     @GetMapping("/signup/{nickname}/nickname")
     public ResponseEntity<Boolean> existNickname(@PathVariable String nickname){
         return ResponseEntity.ok(userService.existNickname(nickname));
+    }
+
+    @GetMapping("/member/list")
+    public ResponseEntity<ListUser> list(@RequestBody ListUser listUser){
+        return new ResponseEntity<>(userService.listUser(listUser), HttpStatus.OK);
     }
 
     @GetMapping("/refresh")
