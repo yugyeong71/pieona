@@ -81,9 +81,9 @@ public class UserService{
         return userRepository.existsByNickname(nickname);
     }
 
-    public ListUser listUser(ListUser listUser){
+    public ListUser listUser(Long id){
 
-        User user = userRepository.findByEmail(listUser.getEmail()).orElseThrow(() -> new BadCredentialsException("잘못된 정보입니다."));
+        User user = userRepository.findById(id).orElseThrow(() -> new BadCredentialsException("일치하는 회원 정보가 존재하지 않습니다."));
 
         return ListUser.builder()
                 .id(user.getId())

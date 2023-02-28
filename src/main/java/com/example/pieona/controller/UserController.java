@@ -12,6 +12,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequiredArgsConstructor
 public class UserController {
@@ -41,9 +43,14 @@ public class UserController {
         return ResponseEntity.ok(userService.existNickname(nickname));
     }
 
-    @GetMapping("/member/list")
+    /*@GetMapping("/member/list/{id}")
     public ResponseEntity<ListUser> list(@RequestBody ListUser listUser){
         return new ResponseEntity<>(userService.listUser(listUser), HttpStatus.OK);
+    }*/
+
+    @GetMapping("/member/{id}")
+    public ListUser list(@PathVariable Long id){
+        return userService.listUser(id);
     }
 
     @GetMapping("/refresh")
