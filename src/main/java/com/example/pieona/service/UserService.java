@@ -43,6 +43,7 @@ public class UserService{
         user.setRefreshToken(createRefreshToken(user));
 
         return SignResponse.builder()
+                .id(user.getId())
                 .email(user.getEmail())
                 .gender(user.getGender())
                 .token(TokenDto.builder()
