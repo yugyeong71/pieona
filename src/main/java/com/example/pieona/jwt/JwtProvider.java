@@ -27,6 +27,8 @@ public class JwtProvider {
 
     private Key secretKey;
 
+    private final long exp = 1000L * 60 * 30; // 만료시간 : 30분
+
     private final JpaUserDetailsService userDetailsService;
 
     @PostConstruct
@@ -43,7 +45,7 @@ public class JwtProvider {
         return Jwts.builder()
                 .setClaims(claims)
                 .setIssuedAt(now)
-                .setExpiration(new Date(now.getTime()))
+                .setExpiration(new Date(now.getTime() + exp))
                 .signWith(secretKey, SignatureAlgorithm.HS256)
                 .compact();
     }
@@ -51,14 +53,14 @@ public class JwtProvider {
     // 권한 정보 획득
     // Spring Security 인증 과정에서 권한 확인을 위한 기능
     public Authentication getAuthentication(String token){
-        UserDetails userDetails = userDetailsService.loadUserByUsername(this.getMemId(token));
+        UserDetails userDetails = userDetailsService.loadUserByUsername(this.getEmail(token));
         return new UsernamePasswordAuthenticationToken(userDetails, "", userDetails.getAuthorities());
     }
 
     // 토큰에 담겨있는 유저 memId 획득
-    public String getMemId(String token){
+    public String getEmail(String token){
 
-        try {
+        /*try {
             Jwts.parserBuilder().setSigningKey(secretKey).build().parseClaimsJwt(token).getBody().getSubject();
         } catch (ExpiredJwtException e){
             e.printStackTrace();
@@ -67,7 +69,9 @@ public class JwtProvider {
             e.printStackTrace();
         }
 
-        return Jwts.parserBuilder().setSigningKey(secretKey).build().parseClaimsJwt(token).getBody().getSubject();
+        return Jwts.parserBuilder().setSigningKey(secretKey).build().parseClaimsJwt(token).getBody().getSubject();*/
+
+        return Jwts.parserBuilder().setSigningKey(secretKey).build().parseClaimsJws(token).getBody().getSubject();
     }
 
     // Authorization Header를 통해 인증을 한다.
@@ -76,10 +80,10 @@ public class JwtProvider {
     }
 
     // 토큰 검증
-    public boolean validationToken(String token){
+    public boolean validateToken(String token){
         try{
             // Bearer 검증
-            if(!token.substring(0, "BEARER ".length()).equalsIgnoreCase("BEARER")){
+            if(!token.substring(0, "BEARER ".length()).equalsIgnoreCase("BEARER ")){
                 return false;
             }
 
@@ -91,6 +95,7 @@ public class JwtProvider {
 
             // 만료되었을 시 false
             return !claims.getBody().getExpiration().before(new Date());
+
         } catch (Exception e){
             return false;
         }

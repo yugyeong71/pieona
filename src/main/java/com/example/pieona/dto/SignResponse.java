@@ -17,5 +17,4 @@ public class SignResponse {
 
     private TokenDto token;
 
-
 }

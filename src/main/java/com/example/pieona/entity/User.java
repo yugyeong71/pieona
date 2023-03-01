@@ -29,8 +29,6 @@ public class User {
 
     private String image;
 
-    private String content;
-
     private boolean isOn;
 
     private String refreshToken;

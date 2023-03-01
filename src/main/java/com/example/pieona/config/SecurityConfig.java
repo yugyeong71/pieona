@@ -75,17 +75,16 @@ public class SecurityConfig {
                 )
                 // Spring Security 세션 정책 : 세션을 생성 및 사용하지 않음
                 .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-                .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 .and()
                 // 조건별로 요청 허용/제한 설정
-                .authorizeRequests()
+                .authorizeHttpRequests()
                 // 회원가입과 로그인은 모두 승인
                 .requestMatchers("/signup/**", "/login", "/social", "/refresh", "/auth/**", "/oauth2/**", "/", "/member/**").permitAll()
                 // /admin으로 시작하는 요청은 ADMIN 권한이 있는 유저에게만 허용
                 .requestMatchers("/admin/**").hasRole("ADMIN")
                 // /user 로 시작하는 요청은 USER 권한이 있는 유저에게만 허용
                 .requestMatchers("/user/**").hasRole("USER")
-                .anyRequest().denyAll()
+                .anyRequest().authenticated()
                 .and()
                 .oauth2Login()
                 .userInfoEndpoint()
@@ -118,7 +117,7 @@ public class SecurityConfig {
                         response.setStatus(401);
                         response.setCharacterEncoding("utf-8");
                         response.setContentType("text/html; charset=UTF-8");
-                        response.getWriter().write("인증되지 않은 사용자입니다.");
+                        response.getWriter().write("인증이 필요합니다.");
                     }
                 });
 

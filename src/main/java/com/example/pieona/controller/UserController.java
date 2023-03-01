@@ -5,7 +5,6 @@ import com.example.pieona.dto.ListUser;
 import com.example.pieona.dto.SignRequest;
 import com.example.pieona.dto.SignResponse;
 import com.example.pieona.dto.TokenDto;
-import com.example.pieona.security.JpaUserDetailsService;
 import com.example.pieona.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -18,17 +17,14 @@ public class UserController {
 
     private final UserService userService;
 
-    private final JpaUserDetailsService jpaUserDetailsService;
-
     @PostMapping("/login")
-    public ResponseEntity<SignResponse> login(@RequestBody SignRequest request) throws Exception {
+    public ResponseEntity<SignResponse> login(@RequestBody SignRequest request) {
         return new ResponseEntity<>(userService.login(request), HttpStatus.OK);
     }
 
-    @PostMapping( "/signup")
-    public SuccessMessage signUp(@RequestBody SignRequest request) throws Exception {
-        userService.signUp(request);
-        return new SuccessMessage();
+    @PostMapping("/signup")
+    public ResponseEntity<SuccessMessage> signUp(@RequestBody SignRequest request) throws Exception {
+        return new ResponseEntity<>(userService.signUp(request), HttpStatus.OK);
     }
 
     @GetMapping("/signup/{email}/email")
@@ -51,9 +47,5 @@ public class UserController {
         return new ResponseEntity<>(userService.refreshAccessToken(token), HttpStatus.OK);
     }
 
-    @GetMapping("/") // https 테스트용
-    public String test(){
-        return "test";
-    }
 
 }

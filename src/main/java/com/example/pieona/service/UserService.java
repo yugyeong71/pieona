@@ -34,7 +34,8 @@ public class UserService{
     private final TokenRepository tokenRepository;
 
     public SignResponse login(SignRequest request) {
-        User user = userRepository.findByEmail(request.getEmail()).orElseThrow(() -> new BadCredentialsException("잘못된 정보입니다."));
+        User user = userRepository.findByEmail(request.getEmail()).orElseThrow(() ->
+                new BadCredentialsException("잘못된 정보입니다."));
 
         if(!passwordEncoder.matches(request.getPassword(), user.getPassword())){
             throw new BadCredentialsException("잘못된 정보입니다.");
@@ -139,7 +140,7 @@ public class UserService{
 
     public TokenDto refreshAccessToken(TokenDto token) throws Exception{
 
-        String email = jwtProvider.getMemId(token.getAccess_token());
+        String email = jwtProvider.getEmail(token.getAccess_token());
         User user = userRepository.findByEmail(email).orElseThrow(() ->
                 new BadCredentialsException("잘못된 계정 정보입니다."));
         Token refreshToken = vaildRefreshToken(user, token.getRefresh_token());
@@ -153,5 +154,6 @@ public class UserService{
             throw new Exception("로그인을 해주세요.");
         }
     }
+
 
 }
