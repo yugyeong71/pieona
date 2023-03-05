@@ -1,6 +1,7 @@
 package com.example.pieona.service;
 
 import com.example.pieona.common.SuccessMessage;
+import com.example.pieona.config.RedisConfig;
 import com.example.pieona.dto.ListUser;
 import com.example.pieona.dto.SignRequest;
 import com.example.pieona.dto.SignResponse;
@@ -11,14 +12,18 @@ import com.example.pieona.jwt.JwtProvider;
 import com.example.pieona.jwt.Token;
 import com.example.pieona.repo.TokenRepository;
 import com.example.pieona.repo.UserRepository;
+import jakarta.transaction.Status;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Collections;
 import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 
 @Service
 @RequiredArgsConstructor
@@ -32,6 +37,7 @@ public class UserService{
     private final JwtProvider jwtProvider;
 
     private final TokenRepository tokenRepository;
+
 
     public SignResponse login(SignRequest request) {
         User user = userRepository.findByEmail(request.getEmail()).orElseThrow(() ->
@@ -74,6 +80,7 @@ public class UserService{
 
         return new SuccessMessage();
     }
+
 
     public boolean existEmail(String email){
         return userRepository.existsByEmail(email);
@@ -154,6 +161,7 @@ public class UserService{
             throw new Exception("로그인을 해주세요.");
         }
     }
+
 
 
 }

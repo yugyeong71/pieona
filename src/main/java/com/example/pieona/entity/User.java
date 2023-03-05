@@ -1,5 +1,6 @@
 package com.example.pieona.entity;
 
+import com.example.pieona.board.entity.Board;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -8,6 +9,8 @@ import lombok.NoArgsConstructor;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import static jakarta.persistence.CascadeType.ALL;
 
 @Entity
 @Getter @Builder
@@ -33,7 +36,7 @@ public class User {
 
     private String refreshToken;
 
-    @OneToMany(mappedBy = "user", fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "user", fetch = FetchType.EAGER, cascade = ALL)
     @Builder.Default
     private List<Authority> roles = new ArrayList<>();
 
@@ -46,4 +49,13 @@ public class User {
         this.refreshToken = refreshToken;
     }
 
+    // 회원탈퇴 -> 작성한 게시물 모두 삭제
+    @OneToMany(mappedBy = "userId", cascade = ALL, orphanRemoval = true)
+    private List<Board> boardList = new ArrayList<>();
+
+
+    // 연관관계 메소드
+    public void addBoard(Board board){
+        boardList.add(board);
+    }
 }

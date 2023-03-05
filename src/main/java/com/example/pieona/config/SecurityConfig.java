@@ -2,10 +2,6 @@ package com.example.pieona.config;
 
 import com.example.pieona.jwt.JwtAuthenticationFilter;
 import com.example.pieona.jwt.JwtProvider;
-import com.example.pieona.oauth2.service.CustomOAuth2Service;
-import com.example.pieona.oauth2.handler.OAuth2AuthenticationFailureHandler;
-import com.example.pieona.oauth2.handler.OAuth2AuthenticationSuccessHandler;
-import com.example.pieona.oauth2.service.CustomOidcUserService;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -35,15 +31,28 @@ import java.util.List;
 @EnableWebSecurity
 public class SecurityConfig {
 
+    private static final String[] ALL_PERMIT = {
+            "/signup/**",
+            "/login",
+            "/social",
+            "/refresh",
+            "/auth/**",
+            "/oauth2/**",
+            "/",
+            "/member/**"
+    };
+
+    private static final String[] ADMIN_PERMIT = {
+            "/admin/**"
+    };
+
+    private static final String[] USER_PERMIT = {
+            "/user/**",
+            "/post/**"
+    };
+
     private final JwtProvider jwtProvider;
 
-    private final CustomOAuth2Service customOAuth2UserService;
-
-    private final CustomOidcUserService customOidcUserService;
-
-    private final OAuth2AuthenticationSuccessHandler oAuth2AuthenticationSuccessHandler;
-
-    private final OAuth2AuthenticationFailureHandler oAuth2AuthenticationFailureHandler;
 
 
     @Bean
@@ -74,27 +83,15 @@ public class SecurityConfig {
                         }
                 )
                 // Spring Security 세션 정책 : 세션을 생성 및 사용하지 않음
-                .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+                //.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+                .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.NEVER)
                 .and()
                 // 조건별로 요청 허용/제한 설정
                 .authorizeHttpRequests()
-                // 회원가입과 로그인은 모두 승인
-                .requestMatchers("/signup/**", "/login", "/social", "/refresh", "/auth/**", "/oauth2/**", "/", "/member/**").permitAll()
-                // /admin으로 시작하는 요청은 ADMIN 권한이 있는 유저에게만 허용
-                .requestMatchers("/admin/**").hasRole("ADMIN")
-                // /user 로 시작하는 요청은 USER 권한이 있는 유저에게만 허용
-                .requestMatchers("/user/**").hasRole("USER")
+                .requestMatchers(ALL_PERMIT).permitAll()
+                .requestMatchers(ADMIN_PERMIT).hasRole("ADMIN")
+                .requestMatchers(USER_PERMIT).hasRole("USER")
                 .anyRequest().authenticated()
-                .and()
-                .oauth2Login()
-                .userInfoEndpoint()
-                .oidcUserService(customOidcUserService)
-                .userService(customOAuth2UserService)
-                .and()
-                .redirectionEndpoint().baseUri("/oauth2/code/*")
-                .and()
-                .successHandler(oAuth2AuthenticationSuccessHandler)
-                .failureHandler(oAuth2AuthenticationFailureHandler)
                 .and()
                 // JWT 인증 필터 적용
                 .addFilterBefore(new JwtAuthenticationFilter(jwtProvider), UsernamePasswordAuthenticationFilter.class)
