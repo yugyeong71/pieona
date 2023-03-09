@@ -22,8 +22,6 @@ public class BoardRequestDto {
 
     private String myGender;
 
-    //private String myLocation;
-
     private Location location;
 
     private String preferTalent;
@@ -38,7 +36,6 @@ public class BoardRequestDto {
         return Board.builder()
                 .myTalent(myTalent)
                 .myGender(myGender)
-                //.myLocation(myLocation)
                 .location(location)
                 .preferTalent(preferTalent)
                 .preferGender(preferGender)

@@ -58,4 +58,5 @@ public class User {
     public void addBoard(Board board){
         boardList.add(board);
     }
+
 }

@@ -39,7 +39,8 @@ public class SecurityConfig {
             "/auth/**",
             "/oauth2/**",
             "/",
-            "/member/**"
+            "/member/**",
+            "/list"
     };
 
     private static final String[] ADMIN_PERMIT = {
