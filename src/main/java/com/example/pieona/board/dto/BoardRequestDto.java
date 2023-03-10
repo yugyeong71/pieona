@@ -1,13 +1,11 @@
 package com.example.pieona.board.dto;
 
 import com.example.pieona.board.entity.Board;
-import com.example.pieona.entity.User;
+import com.example.pieona.user.entity.User;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import lombok.Getter;
 import lombok.Setter;
-
-import java.util.List;
 
 @Getter @Setter
 public class BoardRequestDto {

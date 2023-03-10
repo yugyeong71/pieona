@@ -1,6 +1,6 @@
 package com.example.pieona.security;
 
-import com.example.pieona.entity.User;
+import com.example.pieona.user.entity.User;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;

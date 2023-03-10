@@ -1,4 +1,4 @@
-package com.example.pieona.repo;
+package com.example.pieona.jwt.repo;
 
 import com.example.pieona.jwt.Token;
 import org.springframework.data.repository.CrudRepository;

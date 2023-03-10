@@ -1,6 +1,6 @@
-package com.example.pieona.repo;
+package com.example.pieona.user.repo;
 
-import com.example.pieona.entity.User;
+import com.example.pieona.user.entity.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.transaction.annotation.Transactional;
 

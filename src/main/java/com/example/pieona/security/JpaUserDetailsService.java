@@ -1,7 +1,7 @@
 package com.example.pieona.security;
 
-import com.example.pieona.entity.User;
-import com.example.pieona.repo.UserRepository;
+import com.example.pieona.user.entity.User;
+import com.example.pieona.user.repo.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;

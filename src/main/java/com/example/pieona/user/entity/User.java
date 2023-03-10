@@ -1,4 +1,4 @@
-package com.example.pieona.entity;
+package com.example.pieona.user.entity;
 
 import com.example.pieona.board.entity.Board;
 import jakarta.persistence.*;

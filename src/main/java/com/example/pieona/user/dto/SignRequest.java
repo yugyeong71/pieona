@@ -1,4 +1,4 @@
-package com.example.pieona.dto;
+package com.example.pieona.user.dto;
 
 import lombok.*;
 

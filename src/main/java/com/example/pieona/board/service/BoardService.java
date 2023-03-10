@@ -1,19 +1,15 @@
 package com.example.pieona.board.service;
 
 import com.example.pieona.board.dto.BoardRequestDto;
-import com.example.pieona.board.dto.BoardResponseDto;
 import com.example.pieona.board.entity.Board;
 import com.example.pieona.board.repo.BoardRepository;
 import com.example.pieona.common.SecurityUtil;
 import com.example.pieona.common.SuccessMessage;
-import com.example.pieona.entity.User;
-import com.example.pieona.repo.UserRepository;
+import com.example.pieona.user.repo.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.List;
 
 
 @Service

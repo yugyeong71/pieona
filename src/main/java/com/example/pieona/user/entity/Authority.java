@@ -1,4 +1,4 @@
-package com.example.pieona.entity;
+package com.example.pieona.user.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;

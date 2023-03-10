@@ -1,4 +1,4 @@
-package com.example.pieona.dto;
+package com.example.pieona.jwt.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

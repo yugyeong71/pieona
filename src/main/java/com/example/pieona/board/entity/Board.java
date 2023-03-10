@@ -1,8 +1,7 @@
 package com.example.pieona.board.entity;
 
 import com.example.pieona.board.dto.Location;
-import com.example.pieona.entity.User;
-import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.example.pieona.user.entity.User;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;

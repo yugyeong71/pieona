@@ -1,14 +1,9 @@
 package com.example.pieona.board.dto;
 
-import com.example.pieona.board.entity.Board;
-import com.example.pieona.entity.User;
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import jakarta.persistence.FetchType;
+import com.example.pieona.user.entity.User;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import lombok.*;
-
-import java.util.stream.Collectors;
 
 @Getter @Setter
 @Builder @AllArgsConstructor @NoArgsConstructor

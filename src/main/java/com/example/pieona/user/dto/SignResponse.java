@@ -1,5 +1,6 @@
-package com.example.pieona.dto;
+package com.example.pieona.user.dto;
 
+import com.example.pieona.jwt.dto.TokenDto;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;

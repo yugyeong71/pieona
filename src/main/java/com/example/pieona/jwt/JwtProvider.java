@@ -1,6 +1,6 @@
 package com.example.pieona.jwt;
 
-import com.example.pieona.entity.Authority;
+import com.example.pieona.user.entity.Authority;
 import com.example.pieona.security.JpaUserDetailsService;
 import io.jsonwebtoken.*;
 import jakarta.annotation.PostConstruct;
