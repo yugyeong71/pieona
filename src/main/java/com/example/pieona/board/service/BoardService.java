@@ -35,7 +35,7 @@ public class BoardService {
     public SuccessMessage deleteBoard(BoardRequestDto requestDto, Long id) {
         Board board = requestDto.toEntity();
         board.listBoard(userRepository.findByEmail(SecurityUtil.getLoginUsername())
-                .orElseThrow(() -> new BadCredentialsException("잘못된 정보입니다.")));
+                .orElseThrow(() -> new BadCredentialsException("존재하지 않는 게시글입니다.")));
 
         boardRepository.deleteById(id);
 

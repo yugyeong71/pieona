@@ -1,6 +1,7 @@
 package com.example.pieona.user.entity;
 
 import com.example.pieona.board.entity.Board;
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -50,7 +51,8 @@ public class User {
     }
 
     // 회원탈퇴 -> 작성한 게시물 모두 삭제
-    @OneToMany(mappedBy = "userId", cascade = ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "userId", cascade = ALL, orphanRemoval = true, fetch = FetchType.EAGER)
+    @JsonBackReference
     private List<Board> boardList = new ArrayList<>();
 
 

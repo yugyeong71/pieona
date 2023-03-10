@@ -44,6 +44,8 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-data-redis'
     implementation 'org.springframework.boot:spring-boot-starter-mail'
 
+    implementation 'org.modelmapper:modelmapper:2.4.2'
+
 
 }
 

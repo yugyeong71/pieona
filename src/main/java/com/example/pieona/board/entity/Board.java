@@ -2,6 +2,7 @@ package com.example.pieona.board.entity;
 
 import com.example.pieona.board.dto.Location;
 import com.example.pieona.user.entity.User;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -44,5 +45,6 @@ public class Board {
     public void listBoard(User userId) {
         this.userId = userId;
     }
+
 
 }
