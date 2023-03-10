@@ -1,6 +1,7 @@
 package com.example.pieona.board.service;
 
 import com.example.pieona.board.dto.BoardRequestDto;
+import com.example.pieona.board.dto.BoardUpdateDto;
 import com.example.pieona.board.entity.Board;
 import com.example.pieona.board.repo.BoardRepository;
 import com.example.pieona.common.SecurityUtil;
@@ -28,6 +29,18 @@ public class BoardService {
                 .orElseThrow(() -> new BadCredentialsException("잘못된 정보입니다.")));
 
         boardRepository.save(board);
+
+        return new SuccessMessage();
+    }
+
+    public SuccessMessage updateBoard(Long id, BoardUpdateDto updateDto){
+        Board board = boardRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException());
+        /*board.listBoard(userRepository.findByEmail(SecurityUtil.getLoginUsername())
+                .orElseThrow(() -> new BadCredentialsException("존재하지 않는 게시글입니다.")));*/
+
+        board.update(updateDto.getMyTalent(), updateDto.getLocation(), updateDto.getPreferTalent(),
+                updateDto.getPreferGender(), updateDto.getLessonType(), updateDto.getContent());
 
         return new SuccessMessage();
     }

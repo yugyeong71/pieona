@@ -1,6 +1,7 @@
 package com.example.pieona.board.controller;
 
 import com.example.pieona.board.dto.BoardRequestDto;
+import com.example.pieona.board.dto.BoardUpdateDto;
 import com.example.pieona.board.repo.BoardRepository;
 import com.example.pieona.board.service.BoardService;
 import com.example.pieona.common.SuccessMessage;
@@ -36,6 +37,13 @@ public class BoardController {
         return boardRepository.findAll().stream()
                 .map(m -> modelMapper.map(m, BoardRequestDto.class))
                 .collect(Collectors.toList());
+    }
+
+    @PutMapping("/post/{id}")
+    public SuccessMessage updateBoard(@PathVariable Long id, @RequestBody BoardUpdateDto updateDto){
+        boardService.updateBoard(id, updateDto);
+
+        return new SuccessMessage();
     }
 
     @DeleteMapping("/post/{id}")

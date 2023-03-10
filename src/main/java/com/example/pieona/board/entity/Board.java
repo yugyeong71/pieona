@@ -46,5 +46,14 @@ public class Board {
         this.userId = userId;
     }
 
+    public void update(String myTalent, Location location, String preferTalent, String preferGender, String lessonType, String content){
+        this.myTalent = myTalent;
+        this.location = location;
+        this.preferTalent = preferTalent;
+        this.preferGender = preferGender;
+        this.lessonType = lessonType;
+        this.content = content;
+    }
+
 
 }
