@@ -5,6 +5,7 @@ import com.example.pieona.security.JpaUserDetailsService;
 import io.jsonwebtoken.*;
 import jakarta.annotation.PostConstruct;
 import jakarta.servlet.http.HttpServletRequest;
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -18,6 +19,7 @@ import java.security.Key;
 import java.util.Date;
 import java.util.List;
 
+@Getter
 @RequiredArgsConstructor
 @Component
 public class JwtProvider {
@@ -68,7 +70,6 @@ public class JwtProvider {
         } catch (Exception e){
             e.printStackTrace();
         }
-
         return Jwts.parserBuilder().setSigningKey(secretKey).build().parseClaimsJwt(token).getBody().getSubject();*/
 
         return Jwts.parserBuilder().setSigningKey(secretKey).build().parseClaimsJws(token).getBody().getSubject();

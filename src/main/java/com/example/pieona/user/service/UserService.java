@@ -6,6 +6,7 @@ import com.example.pieona.user.dto.ListUser;
 import com.example.pieona.user.dto.SignRequest;
 import com.example.pieona.user.dto.SignResponse;
 import com.example.pieona.jwt.dto.TokenDto;
+import com.example.pieona.user.dto.UpdateUserDto;
 import com.example.pieona.user.entity.Authority;
 import com.example.pieona.user.entity.User;
 import com.example.pieona.jwt.JwtProvider;
@@ -98,6 +99,17 @@ public class UserService{
                 .image(user.getImage())
                 .build();
     }
+
+    public SuccessMessage updateUser(UpdateUserDto updateUserDto){
+        User user = userRepository
+                .findByEmail(SecurityUtil.getLoginUsername())
+                .orElseThrow(() -> new RuntimeException("로그인 유저 정보가 없습니다."));
+
+        user.update(updateUserDto);
+
+        return new SuccessMessage();
+    }
+
 
     public SuccessMessage delUser(){
         String userId = SecurityUtil.getLoginUsername();

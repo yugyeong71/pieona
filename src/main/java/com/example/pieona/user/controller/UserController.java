@@ -5,6 +5,7 @@ import com.example.pieona.user.dto.ListUser;
 import com.example.pieona.user.dto.SignRequest;
 import com.example.pieona.user.dto.SignResponse;
 import com.example.pieona.jwt.dto.TokenDto;
+import com.example.pieona.user.dto.UpdateUserDto;
 import com.example.pieona.user.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -42,14 +43,19 @@ public class UserController {
         return userService.listUser(id);
     }
 
-    @GetMapping("/refresh")
-    public ResponseEntity<TokenDto> refresh(@RequestBody TokenDto token) throws Exception{
-        return new ResponseEntity<>(userService.refreshAccessToken(token), HttpStatus.OK);
+    @PutMapping("/user/update")
+    public ResponseEntity<SuccessMessage> updateUser(@RequestBody UpdateUserDto updateUserDto){
+        return ResponseEntity.ok(userService.updateUser(updateUserDto));
     }
 
     @DeleteMapping("/user/delete")
     public ResponseEntity<SuccessMessage> delUser(){
         return new ResponseEntity<>(userService.delUser(), HttpStatus.OK);
+    }
+
+    @GetMapping("/refresh")
+    public ResponseEntity<TokenDto> refresh(@RequestBody TokenDto token) throws Exception{
+        return new ResponseEntity<>(userService.refreshAccessToken(token), HttpStatus.OK);
     }
 
 }

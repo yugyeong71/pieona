@@ -1,6 +1,7 @@
 package com.example.pieona.user.entity;
 
 import com.example.pieona.board.entity.Board;
+import com.example.pieona.user.dto.UpdateUserDto;
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -60,5 +61,11 @@ public class User {
     public void addBoard(Board board){
         boardList.add(board);
     }
+
+    public void update(UpdateUserDto dto) {
+        if (dto.getNickname() != null) this.nickname = dto.getNickname();
+        if (dto.getImage() != null) this.image = dto.getImage();
+    }
+
 
 }
