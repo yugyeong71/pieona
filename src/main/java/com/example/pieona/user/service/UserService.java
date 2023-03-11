@@ -1,5 +1,6 @@
 package com.example.pieona.user.service;
 
+import com.example.pieona.common.SecurityUtil;
 import com.example.pieona.common.SuccessMessage;
 import com.example.pieona.user.dto.ListUser;
 import com.example.pieona.user.dto.SignRequest;
@@ -96,6 +97,18 @@ public class UserService{
                 .gender(user.getGender())
                 .image(user.getImage())
                 .build();
+    }
+
+    public SuccessMessage delUser(){
+        String userId = SecurityUtil.getLoginUsername();
+
+        if (userId == null){
+            throw new RuntimeException("로그인 유저 정보가 없습니다.");
+        }
+
+        userRepository.deleteByEmail(userId);
+
+        return new SuccessMessage();
     }
 
 

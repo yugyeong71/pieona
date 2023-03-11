@@ -47,5 +47,9 @@ public class UserController {
         return new ResponseEntity<>(userService.refreshAccessToken(token), HttpStatus.OK);
     }
 
+    @DeleteMapping("/user/delete")
+    public ResponseEntity<SuccessMessage> delUser(){
+        return new ResponseEntity<>(userService.delUser(), HttpStatus.OK);
+    }
 
 }
