@@ -8,6 +8,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -30,6 +31,8 @@ import java.util.List;
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
+
+    private final RedisTemplate redisTemplate;
 
     private static final String[] ALL_PERMIT = {
             "/signup/**",
@@ -95,7 +98,7 @@ public class SecurityConfig {
                 .anyRequest().authenticated()
                 .and()
                 // JWT 인증 필터 적용
-                .addFilterBefore(new JwtAuthenticationFilter(jwtProvider), UsernamePasswordAuthenticationFilter.class)
+                .addFilterBefore(new JwtAuthenticationFilter(jwtProvider, redisTemplate), UsernamePasswordAuthenticationFilter.class)
                 // 에러 핸들링
                 .exceptionHandling()
                 .accessDeniedHandler(new AccessDeniedHandler() {
@@ -117,7 +120,8 @@ public class SecurityConfig {
                         response.setContentType("text/html; charset=UTF-8");
                         response.getWriter().write("인증이 필요합니다.");
                     }
-                });
+                }
+                );
 
         return http.build();
     }

@@ -7,6 +7,7 @@ import com.example.pieona.user.dto.SignResponse;
 import com.example.pieona.jwt.dto.TokenDto;
 import com.example.pieona.user.dto.UpdateUserDto;
 import com.example.pieona.user.service.UserService;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -21,6 +22,12 @@ public class UserController {
     @PostMapping("/login")
     public ResponseEntity<SignResponse> login(@RequestBody SignRequest request) {
         return new ResponseEntity<>(userService.login(request), HttpStatus.OK);
+    }
+
+    @PostMapping("/user/logout")
+    public SuccessMessage logout(String token, HttpServletRequest request){
+        userService.logout(token, request);
+        return new SuccessMessage();
     }
 
     @PostMapping("/signup")

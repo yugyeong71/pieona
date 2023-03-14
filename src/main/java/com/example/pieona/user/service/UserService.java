@@ -13,14 +13,18 @@ import com.example.pieona.jwt.JwtProvider;
 import com.example.pieona.jwt.Token;
 import com.example.pieona.jwt.repo.TokenRepository;
 import com.example.pieona.user.repo.UserRepository;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Collections;
 import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 
 @Service
 @RequiredArgsConstructor
@@ -34,6 +38,8 @@ public class UserService{
     private final JwtProvider jwtProvider;
 
     private final TokenRepository tokenRepository;
+
+    private final RedisTemplate redisTemplate;
 
 
     public SignResponse login(SignRequest request) {
@@ -51,8 +57,8 @@ public class UserService{
                 .email(user.getEmail())
                 .gender(user.getGender())
                 .token(TokenDto.builder()
-                        .access_token(jwtProvider.createToken(user.getEmail(), user.getRoles()))
-                        .refresh_token(user.getRefreshToken())
+                        .access_token(jwtProvider.createAccessToken(user.getEmail(), user.getRoles()))
+                        .refresh_token(jwtProvider.createRefreshToken(user.getEmail(), user.getRoles()))
                         .build())
                 .build();
     }
@@ -76,6 +82,27 @@ public class UserService{
         }
 
         return new SuccessMessage();
+    }
+
+    public void logout(String token, HttpServletRequest request){
+
+        token = jwtProvider.resolveToken(request);
+
+        if (!jwtProvider.validateToken(token)){
+            throw new IllegalArgumentException("로그아웃 : 유효하지 않은 토큰입니다.");
+        }
+
+        token = token.split(" ")[1].trim();
+        Authentication authentication = jwtProvider.getAuthentication(token);
+
+        if (redisTemplate.opsForValue().get("refreshToken:"+authentication.getName())!=null){
+            // Refresh Token을 삭제
+            redisTemplate.delete("refreshToken:"+authentication.getName());
+        }
+
+        Long expiration = jwtProvider.getExpiration(token);
+        redisTemplate.opsForValue().set(token,"logout",expiration,TimeUnit.MILLISECONDS);
+
     }
 
 
@@ -174,7 +201,7 @@ public class UserService{
 
         if(refreshToken != null){
             return TokenDto.builder()
-                    .access_token(jwtProvider.createToken(email, user.getRoles()))
+                    .access_token(jwtProvider.createAccessToken(email, user.getRoles()))
                     .refresh_token(refreshToken.getRefresh_token())
                     .build();
         }else {

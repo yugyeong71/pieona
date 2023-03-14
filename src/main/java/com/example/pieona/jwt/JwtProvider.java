@@ -19,6 +19,9 @@ import java.security.Key;
 import java.util.Date;
 import java.util.List;
 
+/*
+    Access Token 을 발급해주는 클래스
+ */
 @Getter
 @RequiredArgsConstructor
 @Component
@@ -29,7 +32,9 @@ public class JwtProvider {
 
     private Key secretKey;
 
-    private final long exp = 1000L * 60 * 30; // 만료시간 : 30분
+    private final long accessExp = 1000L * 60 * 30; // 액세스 토큰 만료 시간 : 30분
+
+    private final long refreshExp = 1000L * 1000 * 1000; // 리프레시 토큰 만료 시간
 
     private final JpaUserDetailsService userDetailsService;
 
@@ -38,9 +43,11 @@ public class JwtProvider {
         secretKey = Keys.hmacShaKeyFor(salt.getBytes(StandardCharsets.UTF_8));
     }
 
-    // 토큰 생성
-    public String createToken(String memId, List<Authority> roles){
-        Claims claims = Jwts.claims().setSubject(memId);
+    /*
+        토큰 생성
+     */
+    /*public String createToken(String email, List<Authority> roles){
+        Claims claims = Jwts.claims().setSubject(email);
         claims.put("roles", roles);
         Date now = new Date();
 
@@ -50,41 +57,65 @@ public class JwtProvider {
                 .setExpiration(new Date(now.getTime() + exp))
                 .signWith(secretKey, SignatureAlgorithm.HS256)
                 .compact();
+    }*/
+
+    public String createAccessToken(String email, List<Authority> roles){
+        Claims claims = Jwts.claims().setSubject(email);
+        claims.put("roles", roles);
+        Date now = new Date();
+
+        return Jwts.builder()
+                        .setClaims(claims) // 정보 저장
+                        .setIssuedAt(now) // 토큰 발행 시간
+                        .setExpiration(new Date(now.getTime() + accessExp)) // 만료 시간
+                        .signWith(secretKey, SignatureAlgorithm.HS256) // 사용할 알고리즘과 signature 에 들어갈 secretKey
+                        .compact();
     }
 
-    // 권한 정보 획득
-    // Spring Security 인증 과정에서 권한 확인을 위한 기능
+    public String createRefreshToken(String email, List<Authority> roles){
+        Claims claims = Jwts.claims().setSubject(email);
+        claims.put("roles", roles);
+        Date now = new Date();
+
+        return Jwts.builder()
+                .setClaims(claims) // 정보 저장
+                .setIssuedAt(now) // 토큰 발행 시간
+                .setExpiration(new Date(now.getTime() + refreshExp)) // 만료 시간
+                .signWith(secretKey, SignatureAlgorithm.HS256) // 사용할 알고리즘과 signature 에 들어갈 secretKey
+                .compact();
+    }
+
+    /*
+        권한 정보 획득
+        Spring Security 인증 과정에서 권한 확인을 위한 기능
+     */
     public Authentication getAuthentication(String token){
         UserDetails userDetails = userDetailsService.loadUserByUsername(this.getEmail(token));
         return new UsernamePasswordAuthenticationToken(userDetails, "", userDetails.getAuthorities());
     }
 
-    // 토큰에 담겨있는 유저 memId 획득
+    /*
+        토큰에 담겨있는 유저 email 획득
+     */
     public String getEmail(String token){
-
-        /*try {
-            Jwts.parserBuilder().setSigningKey(secretKey).build().parseClaimsJwt(token).getBody().getSubject();
-        } catch (ExpiredJwtException e){
-            e.printStackTrace();
-            return e.getClaims().getSubject();
-        } catch (Exception e){
-            e.printStackTrace();
-        }
-        return Jwts.parserBuilder().setSigningKey(secretKey).build().parseClaimsJwt(token).getBody().getSubject();*/
-
+        //String jwtToken = token.split(" ")[1].trim();
         return Jwts.parserBuilder().setSigningKey(secretKey).build().parseClaimsJws(token).getBody().getSubject();
     }
 
-    // Authorization Header를 통해 인증을 한다.
+    /*
+        Authorization Header 를 통해 인증
+     */
     public String resolveToken(HttpServletRequest request){
         return request.getHeader("Authorization");
     }
 
-    // 토큰 검증
+    /*
+        토큰 검증
+     */
     public boolean validateToken(String token){
         try{
             // Bearer 검증
-            if(!token.substring(0, "BEARER ".length()).equalsIgnoreCase("BEARER ")){
+            if(!token.substring(0, "Bearer ".length()).equalsIgnoreCase("Bearer ")){
                 return false;
             }
 
@@ -100,6 +131,14 @@ public class JwtProvider {
         } catch (Exception e){
             return false;
         }
+    }
+
+    public Long getExpiration(String accessToken) {
+        //accessToken = accessToken.split(" ")[1].trim();
+        Date expiration = Jwts.parserBuilder().setSigningKey(secretKey).build().parseClaimsJws(accessToken).getBody().getExpiration();
+
+        Long now = new Date().getTime();
+        return (expiration.getTime() - now);
     }
 
 }
