@@ -36,8 +36,6 @@ public class BoardService {
     public SuccessMessage updateBoard(Long id, BoardUpdateDto updateDto){
         Board board = boardRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException());
-        /*board.listBoard(userRepository.findByEmail(SecurityUtil.getLoginUsername())
-                .orElseThrow(() -> new BadCredentialsException("존재하지 않는 게시글입니다.")));*/
 
         board.update(updateDto.getMyTalent(), updateDto.getLocation(), updateDto.getPreferTalent(),
                 updateDto.getPreferGender(), updateDto.getLessonType(), updateDto.getContent());

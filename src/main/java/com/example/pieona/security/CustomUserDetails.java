@@ -25,6 +25,7 @@ public class CustomUserDetails implements UserDetails { // UserDetails를 상속
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return user.getRoles().stream().map(o -> new SimpleGrantedAuthority(
                 o.getName()
+                //o.getAuthority()
         )).collect(Collectors.toList());
     }
 

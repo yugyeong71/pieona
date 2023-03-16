@@ -2,6 +2,9 @@ package com.example.pieona.config;
 
 import com.example.pieona.jwt.JwtAuthenticationFilter;
 import com.example.pieona.jwt.JwtProvider;
+import com.example.pieona.oauth2.CustomOAuth2UserService;
+import com.example.pieona.oauth2.OAuth2LoginFailureHandler;
+import com.example.pieona.oauth2.OAuth2LoginSuccessHandler;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -12,7 +15,6 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -43,7 +45,8 @@ public class SecurityConfig {
             "/oauth2/**",
             "/",
             "/member/**",
-            "/list"
+            "/list",
+            "/css/**","/images/**","/js/**","/favicon.ico","/h2-console/**"
     };
 
     private static final String[] ADMIN_PERMIT = {
@@ -56,6 +59,9 @@ public class SecurityConfig {
     };
 
     private final JwtProvider jwtProvider;
+    private final OAuth2LoginSuccessHandler oAuth2LoginSuccessHandler;
+    private final OAuth2LoginFailureHandler oAuth2LoginFailureHandler;
+    private final CustomOAuth2UserService customOAuth2UserService;
 
 
 
@@ -119,15 +125,15 @@ public class SecurityConfig {
                         response.setCharacterEncoding("utf-8");
                         response.setContentType("text/html; charset=UTF-8");
                         response.getWriter().write("인증이 필요합니다.");
-                    }
-                }
-                );
+                    }})
+                .and().sessionManagement().sessionCreationPolicy(SessionCreationPolicy.NEVER)
+                .and().oauth2Login().successHandler(oAuth2LoginSuccessHandler) // 동의하고 계속하기를 눌렀을 때 Handler 설정
+                .failureHandler(oAuth2LoginFailureHandler) // 소셜 로그인 실패 시 핸들러 설정
+                .userInfoEndpoint().userService(customOAuth2UserService);;
+
 
         return http.build();
     }
 
-    @Bean
-    public WebSecurityCustomizer webSecurityCustomizer() {
-        return (web -> web.ignoring().requestMatchers("/images/**", "/js/**", "/webjars/**"));
-    }
+
 }

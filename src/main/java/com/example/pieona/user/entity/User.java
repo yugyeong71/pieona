@@ -1,6 +1,8 @@
 package com.example.pieona.user.entity;
 
 import com.example.pieona.board.entity.Board;
+import com.example.pieona.user.Role;
+import com.example.pieona.oauth2.SocialType;
 import com.example.pieona.user.dto.UpdateUserDto;
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
@@ -9,8 +11,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 import static jakarta.persistence.CascadeType.ALL;
 
@@ -67,5 +68,12 @@ public class User {
         if (dto.getImage() != null) this.image = dto.getImage();
     }
 
+    @Enumerated(EnumType.STRING)
+    private Role role;
+
+    @Enumerated(EnumType.STRING)
+    private SocialType socialType;
+
+    private String socialId;
 
 }

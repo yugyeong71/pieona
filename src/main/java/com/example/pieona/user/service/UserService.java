@@ -2,6 +2,7 @@ package com.example.pieona.user.service;
 
 import com.example.pieona.common.SecurityUtil;
 import com.example.pieona.common.SuccessMessage;
+import com.example.pieona.user.Role;
 import com.example.pieona.user.dto.ListUser;
 import com.example.pieona.user.dto.SignRequest;
 import com.example.pieona.user.dto.SignResponse;
@@ -23,7 +24,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Collections;
-import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
 @Service
@@ -50,15 +50,16 @@ public class UserService{
             throw new BadCredentialsException("잘못된 정보입니다.");
         }
 
-        user.setRefreshToken(createRefreshToken(user));
+        user.setRefreshToken(jwtProvider.createRefreshToken(user));
 
         return SignResponse.builder()
                 .id(user.getId())
                 .email(user.getEmail())
                 .gender(user.getGender())
                 .token(TokenDto.builder()
-                        .access_token(jwtProvider.createAccessToken(user.getEmail(), user.getRoles()))
-                        .refresh_token(jwtProvider.createRefreshToken(user.getEmail(), user.getRoles()))
+                        .access_token(jwtProvider.createAccessToken(user.getEmail(), Role.USER))
+                        .refresh_token(jwtProvider.createRefreshToken(user))
+                        //.refresh_token(user.getRefreshToken())
                         .build())
                 .build();
     }
@@ -71,6 +72,7 @@ public class UserService{
                     .nickname(request.getNickname())
                     .image(request.getImage())
                     .gender(request.getGender())
+                    .role(Role.USER)
                     .build();
 
             user.setRoles(Collections.singletonList(Authority.builder().name("ROLE_USER").build()));
@@ -84,7 +86,8 @@ public class UserService{
         return new SuccessMessage();
     }
 
-    public void logout(String token, HttpServletRequest request){
+
+    public SuccessMessage logout(String token, HttpServletRequest request){
 
         token = jwtProvider.resolveToken(request);
 
@@ -95,14 +98,15 @@ public class UserService{
         token = token.split(" ")[1].trim();
         Authentication authentication = jwtProvider.getAuthentication(token);
 
-        if (redisTemplate.opsForValue().get("refreshToken:"+authentication.getName())!=null){
+        if (redisTemplate.opsForValue().get("RT:" + authentication.getName())!=null){
             // Refresh Token을 삭제
-            redisTemplate.delete("refreshToken:"+authentication.getName());
+            redisTemplate.delete("RT:" + authentication.getName());
         }
 
         Long expiration = jwtProvider.getExpiration(token);
         redisTemplate.opsForValue().set(token,"logout",expiration,TimeUnit.MILLISECONDS);
 
+        return new SuccessMessage();
     }
 
 
@@ -150,28 +154,6 @@ public class UserService{
         return new SuccessMessage();
     }
 
-
-    /*
-        Refresh Token
-        Redis 내부에는
-        refreshToken:memberId : tokenValue
-        형태로 저장한다.
-     */
-
-    public String createRefreshToken(User user){
-        Token token = tokenRepository.save(
-                Token.builder()
-                        .id(user.getId())
-                        .refresh_token(UUID.randomUUID().toString())
-                        .expiration(300)
-                        .build()
-        );
-
-        user.setRefreshToken(token.getRefresh_token());
-
-        return token.getRefresh_token();
-    }
-
     public Token vaildRefreshToken(User user, String refreshToken) throws Exception{
         Token token = tokenRepository.findById(user.getId()).orElseThrow(() -> new Exception("만료된 계정입니다. 로그인을 다시 시도하세요."));
 
@@ -195,16 +177,18 @@ public class UserService{
     public TokenDto refreshAccessToken(TokenDto token) throws Exception{
 
         String email = jwtProvider.getEmail(token.getAccess_token());
+
         User user = userRepository.findByEmail(email).orElseThrow(() ->
                 new BadCredentialsException("잘못된 계정 정보입니다."));
+
         Token refreshToken = vaildRefreshToken(user, token.getRefresh_token());
 
         if(refreshToken != null){
             return TokenDto.builder()
-                    .access_token(jwtProvider.createAccessToken(email, user.getRoles()))
-                    .refresh_token(refreshToken.getRefresh_token())
+                    .access_token(jwtProvider.createAccessToken(email, Role.USER))
+                    .refresh_token(jwtProvider.createRefreshToken(user))
                     .build();
-        }else {
+        } else {
             throw new Exception("로그인을 해주세요.");
         }
     }

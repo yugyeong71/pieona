@@ -1,5 +1,6 @@
 package com.example.pieona.user.repo;
 
+import com.example.pieona.oauth2.SocialType;
 import com.example.pieona.user.entity.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.transaction.annotation.Transactional;
@@ -17,5 +18,7 @@ public interface UserRepository extends JpaRepository<User, Long> {
     boolean existsByNickname(String string); // 닉네임 중복 확인
 
     Optional<User> deleteByEmail(String email);
+
+    Optional<User> findBySocialTypeAndSocialId(SocialType socialType, String socialId);
 
 }

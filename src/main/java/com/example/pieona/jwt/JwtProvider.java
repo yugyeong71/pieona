@@ -1,7 +1,9 @@
 package com.example.pieona.jwt;
 
-import com.example.pieona.user.entity.Authority;
+import com.example.pieona.jwt.repo.TokenRepository;
+import com.example.pieona.user.Role;
 import com.example.pieona.security.JpaUserDetailsService;
+import com.example.pieona.user.entity.User;
 import io.jsonwebtoken.*;
 import jakarta.annotation.PostConstruct;
 import jakarta.servlet.http.HttpServletRequest;
@@ -17,10 +19,9 @@ import io.jsonwebtoken.security.Keys;
 import java.nio.charset.StandardCharsets;
 import java.security.Key;
 import java.util.Date;
-import java.util.List;
 
 /*
-    Access Token 을 발급해주는 클래스
+    Token 발급해주는 클래스
  */
 @Getter
 @RequiredArgsConstructor
@@ -34,55 +35,55 @@ public class JwtProvider {
 
     private final long accessExp = 1000L * 60 * 30; // 액세스 토큰 만료 시간 : 30분
 
-    private final long refreshExp = 1000L * 1000 * 1000; // 리프레시 토큰 만료 시간
+    private final long refreshExp = 7 * 24 * 60 * 60 * 1000L; // 리프레시 토큰 만료 시간 : 7시간
 
     private final JpaUserDetailsService userDetailsService;
+
+    private final TokenRepository tokenRepository;
+
 
     @PostConstruct
     protected void init(){
         secretKey = Keys.hmacShaKeyFor(salt.getBytes(StandardCharsets.UTF_8));
     }
 
+
     /*
-        토큰 생성
+        Access Token 발급
      */
-    /*public String createToken(String email, List<Authority> roles){
+
+    public String createAccessToken(String email, Role role){
         Claims claims = Jwts.claims().setSubject(email);
-        claims.put("roles", roles);
-        Date now = new Date();
-
-        return Jwts.builder()
-                .setClaims(claims)
-                .setIssuedAt(now)
-                .setExpiration(new Date(now.getTime() + exp))
-                .signWith(secretKey, SignatureAlgorithm.HS256)
-                .compact();
-    }*/
-
-    public String createAccessToken(String email, List<Authority> roles){
-        Claims claims = Jwts.claims().setSubject(email);
-        claims.put("roles", roles);
-        Date now = new Date();
-
-        return Jwts.builder()
-                        .setClaims(claims) // 정보 저장
-                        .setIssuedAt(now) // 토큰 발행 시간
-                        .setExpiration(new Date(now.getTime() + accessExp)) // 만료 시간
-                        .signWith(secretKey, SignatureAlgorithm.HS256) // 사용할 알고리즘과 signature 에 들어갈 secretKey
-                        .compact();
-    }
-
-    public String createRefreshToken(String email, List<Authority> roles){
-        Claims claims = Jwts.claims().setSubject(email);
-        claims.put("roles", roles);
+        claims.put("role", role);
         Date now = new Date();
 
         return Jwts.builder()
                 .setClaims(claims) // 정보 저장
                 .setIssuedAt(now) // 토큰 발행 시간
-                .setExpiration(new Date(now.getTime() + refreshExp)) // 만료 시간
+                .setExpiration(new Date(now.getTime() + accessExp)) // 만료 시간
                 .signWith(secretKey, SignatureAlgorithm.HS256) // 사용할 알고리즘과 signature 에 들어갈 secretKey
                 .compact();
+    }
+
+    /*
+        Refresh Token 발급
+     */
+    public String createRefreshToken(User user){
+
+        Date now = new Date();
+
+        Token token = tokenRepository.save(
+                Token.builder()
+                        .id(user.getId())
+                        .refresh_token(Jwts.builder()
+                                .setIssuedAt(now) // 토큰 발행 시간
+                                .setExpiration(new Date(now.getTime() + refreshExp)) // 만료 시간
+                                .signWith(secretKey, SignatureAlgorithm.HS256) // 사용할 알고리즘과 signature 에 들어갈 secretKey
+                                .compact())
+                        .build());
+
+        return token.getRefresh_token();
+
     }
 
     /*
@@ -98,7 +99,6 @@ public class JwtProvider {
         토큰에 담겨있는 유저 email 획득
      */
     public String getEmail(String token){
-        //String jwtToken = token.split(" ")[1].trim();
         return Jwts.parserBuilder().setSigningKey(secretKey).build().parseClaimsJws(token).getBody().getSubject();
     }
 
