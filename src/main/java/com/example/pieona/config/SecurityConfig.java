@@ -2,9 +2,9 @@ package com.example.pieona.config;
 
 import com.example.pieona.jwt.JwtAuthenticationFilter;
 import com.example.pieona.jwt.JwtProvider;
-import com.example.pieona.oauth2.CustomOAuth2UserService;
-import com.example.pieona.oauth2.OAuth2LoginFailureHandler;
-import com.example.pieona.oauth2.OAuth2LoginSuccessHandler;
+import com.example.pieona.oauth2.hadler.OAuth2LoginFailureHandler;
+import com.example.pieona.oauth2.hadler.OAuth2LoginSuccessHandler;
+import com.example.pieona.oauth2.service.CustomOAuth2UserService;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -64,7 +64,6 @@ public class SecurityConfig {
     private final CustomOAuth2UserService customOAuth2UserService;
 
 
-
     @Bean
     PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
@@ -72,28 +71,14 @@ public class SecurityConfig {
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception{
-        http
-                .httpBasic().disable() // ID, Password 문자열을 Base64로 인코딩하여 전달하는 구조
-                .formLogin().disable() // 로그인 폼 미사용
-                .csrf().disable() // 쿠키 기반이 아닌 JWT 기반이므로 사용하지 않음
-                .cors(
-                        c -> {
-                            CorsConfigurationSource source = request -> {
-                                // Cors 허용 패턴
+
+            http.httpBasic().disable().formLogin().disable().csrf().disable()
+                .cors(c -> {CorsConfigurationSource source = request -> {
                                 CorsConfiguration config = new CorsConfiguration();
-                                config.setAllowedOrigins(
-                                        List.of("*")
-                                );
-                                config.setAllowedMethods(
-                                        List.of("*")
-                                );
-                                return config;
-                            };
-                            c.configurationSource(source);
-                        }
-                )
+                                config.setAllowedOrigins(List.of("*"));
+                                config.setAllowedMethods(List.of("*"));
+                                return config;};c.configurationSource(source);})
                 // Spring Security 세션 정책 : 세션을 생성 및 사용하지 않음
-                //.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.NEVER)
                 .and()
                 // 조건별로 요청 허용/제한 설정
@@ -115,8 +100,7 @@ public class SecurityConfig {
                         response.setCharacterEncoding("utf-8");
                         response.setContentType("text/html; charset=UTF-8");
                         response.getWriter().write("권한이 없는 사용자입니다.");
-                    }
-                })
+                    }})
                 .authenticationEntryPoint(new AuthenticationEntryPoint() {
                     @Override
                     public void commence(HttpServletRequest request, HttpServletResponse response, AuthenticationException authException) throws IOException, ServletException {
@@ -126,14 +110,10 @@ public class SecurityConfig {
                         response.setContentType("text/html; charset=UTF-8");
                         response.getWriter().write("인증이 필요합니다.");
                     }})
-                .and().sessionManagement().sessionCreationPolicy(SessionCreationPolicy.NEVER)
-                .and().oauth2Login().successHandler(oAuth2LoginSuccessHandler) // 동의하고 계속하기를 눌렀을 때 Handler 설정
-                .failureHandler(oAuth2LoginFailureHandler) // 소셜 로그인 실패 시 핸들러 설정
-                .userInfoEndpoint().userService(customOAuth2UserService);;
-
-
+                    .and().oauth2Login().successHandler(oAuth2LoginSuccessHandler) // 동의하고 계속하기를 눌렀을 때 Handler 설정
+                    .failureHandler(oAuth2LoginFailureHandler) // 소셜 로그인 실패 시 핸들러 설정
+                    .userInfoEndpoint().userService(customOAuth2UserService);
         return http.build();
+
     }
-
-
 }

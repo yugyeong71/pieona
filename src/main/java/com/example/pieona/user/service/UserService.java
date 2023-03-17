@@ -154,6 +154,7 @@ public class UserService{
         return new SuccessMessage();
     }
 
+
     public Token vaildRefreshToken(User user, String refreshToken) throws Exception{
         Token token = tokenRepository.findById(user.getId()).orElseThrow(() -> new Exception("만료된 계정입니다. 로그인을 다시 시도하세요."));
 
@@ -172,6 +173,20 @@ public class UserService{
                 return token;
             }
         }
+    }
+
+
+    public SuccessMessage updatePassword(String asIsPassword, String toBePassword, String email) throws Exception {
+
+        User user = userRepository.findByEmail(email).orElseThrow(() -> new Exception("회원 정보가 존재하지 않습니다."));
+
+        if(!user.matchPassword(passwordEncoder, asIsPassword) ) {
+            throw new Exception();
+        }
+
+        user.updatePassword(passwordEncoder, toBePassword);
+
+        return new SuccessMessage();
     }
 
     public TokenDto refreshAccessToken(TokenDto token) throws Exception{

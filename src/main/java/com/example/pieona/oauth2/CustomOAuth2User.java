@@ -1,5 +1,4 @@
 package com.example.pieona.oauth2;
-
 import com.example.pieona.user.Role;
 import lombok.Getter;
 import org.springframework.security.core.GrantedAuthority;

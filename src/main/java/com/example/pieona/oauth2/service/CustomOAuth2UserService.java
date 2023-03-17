@@ -1,5 +1,7 @@
-package com.example.pieona.oauth2;
-
+package com.example.pieona.oauth2.service;
+import com.example.pieona.oauth2.CustomOAuth2User;
+import com.example.pieona.oauth2.OAuthAttributes;
+import com.example.pieona.oauth2.SocialType;
 import com.example.pieona.user.entity.User;
 import com.example.pieona.user.repo.UserRepository;
 import lombok.RequiredArgsConstructor;

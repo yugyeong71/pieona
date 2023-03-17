@@ -1,11 +1,9 @@
 package com.example.pieona.user.controller;
 
+import com.example.pieona.common.SecurityUtil;
 import com.example.pieona.common.SuccessMessage;
-import com.example.pieona.user.dto.ListUser;
-import com.example.pieona.user.dto.SignRequest;
-import com.example.pieona.user.dto.SignResponse;
+import com.example.pieona.user.dto.*;
 import com.example.pieona.jwt.dto.TokenDto;
-import com.example.pieona.user.dto.UpdateUserDto;
 import com.example.pieona.user.service.UserService;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
@@ -63,6 +61,13 @@ public class UserController {
     @GetMapping("/refresh")
     public ResponseEntity<TokenDto> refresh(@RequestBody TokenDto token) throws Exception{
         return new ResponseEntity<>(userService.refreshAccessToken(token), HttpStatus.OK);
+    }
+
+    @PutMapping("/user/password")
+    public SuccessMessage updatePassword(@RequestBody UpdatePwdDto updatePwdDto) throws Exception {
+        userService.updatePassword(updatePwdDto.checkPassword(),updatePwdDto.newPassword(), SecurityUtil.getLoginUsername());
+
+        return new SuccessMessage();
     }
 
 }

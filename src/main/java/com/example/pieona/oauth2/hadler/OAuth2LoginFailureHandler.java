@@ -1,4 +1,4 @@
-package com.example.pieona.oauth2;
+package com.example.pieona.oauth2.hadler;
 
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;

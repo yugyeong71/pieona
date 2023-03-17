@@ -10,6 +10,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.util.*;
 
@@ -38,6 +39,14 @@ public class User {
     private boolean isOn;
 
     private String refreshToken;
+
+    @Enumerated(EnumType.STRING)
+    private Role role;
+
+    @Enumerated(EnumType.STRING)
+    private SocialType socialType;
+
+    private String socialId;
 
     @OneToMany(mappedBy = "user", fetch = FetchType.EAGER, cascade = ALL)
     @Builder.Default
@@ -68,12 +77,11 @@ public class User {
         if (dto.getImage() != null) this.image = dto.getImage();
     }
 
-    @Enumerated(EnumType.STRING)
-    private Role role;
+    public void updatePassword(PasswordEncoder passwordEncoder, String password){
+        this.password = passwordEncoder.encode(password);
+    }
 
-    @Enumerated(EnumType.STRING)
-    private SocialType socialType;
-
-    private String socialId;
-
+    public boolean matchPassword(PasswordEncoder passwordEncoder, String checkPassword){
+        return passwordEncoder.matches(checkPassword, getPassword());
+    }
 }

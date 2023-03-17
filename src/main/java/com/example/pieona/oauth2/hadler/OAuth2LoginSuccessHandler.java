@@ -1,6 +1,6 @@
-package com.example.pieona.oauth2;
-
+package com.example.pieona.oauth2.hadler;
 import com.example.pieona.jwt.JwtProvider;
+import com.example.pieona.oauth2.CustomOAuth2User;
 import com.example.pieona.user.Role;
 import com.example.pieona.user.entity.User;
 import com.example.pieona.user.repo.UserRepository;

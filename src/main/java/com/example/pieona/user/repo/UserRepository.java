@@ -17,8 +17,8 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
     boolean existsByNickname(String string); // 닉네임 중복 확인
 
-    Optional<User> deleteByEmail(String email);
+    Optional<User> deleteByEmail(String email); // 회원 탈퇴
 
-    Optional<User> findBySocialTypeAndSocialId(SocialType socialType, String socialId);
+    Optional<User> findBySocialTypeAndSocialId(SocialType socialType, String socialId); // 소셜 타입 조회
 
 }
