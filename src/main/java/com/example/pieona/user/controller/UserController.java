@@ -11,6 +11,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Map;
+
 @RestController
 @RequiredArgsConstructor
 public class UserController {
@@ -66,6 +68,14 @@ public class UserController {
     @PutMapping("/user/password")
     public SuccessMessage updatePassword(@RequestBody UpdatePwdDto updatePwdDto) throws Exception {
         userService.updatePassword(updatePwdDto.checkPassword(),updatePwdDto.newPassword(), SecurityUtil.getLoginUsername());
+
+        return new SuccessMessage();
+    }
+
+    @PostMapping("/findPw")
+    public SuccessMessage findPwMail(@RequestBody Map<String, String> map) throws Exception{
+        MailDto mailDto = userService.mailTemporary(map.get("email"));
+        userService.mailSend(mailDto);
 
         return new SuccessMessage();
     }

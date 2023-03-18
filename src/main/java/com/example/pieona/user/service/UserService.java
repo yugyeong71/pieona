@@ -3,11 +3,8 @@ package com.example.pieona.user.service;
 import com.example.pieona.common.SecurityUtil;
 import com.example.pieona.common.SuccessMessage;
 import com.example.pieona.user.Role;
-import com.example.pieona.user.dto.ListUser;
-import com.example.pieona.user.dto.SignRequest;
-import com.example.pieona.user.dto.SignResponse;
+import com.example.pieona.user.dto.*;
 import com.example.pieona.jwt.dto.TokenDto;
-import com.example.pieona.user.dto.UpdateUserDto;
 import com.example.pieona.user.entity.Authority;
 import com.example.pieona.user.entity.User;
 import com.example.pieona.jwt.JwtProvider;
@@ -17,6 +14,9 @@ import com.example.pieona.user.repo.UserRepository;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.mail.SimpleMailMessage;
+import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -41,6 +41,8 @@ public class UserService{
 
     private final RedisTemplate redisTemplate;
 
+    private final JavaMailSender javaMailSender;
+
 
     public SignResponse login(SignRequest request) {
         User user = userRepository.findByEmail(request.getEmail()).orElseThrow(() ->
@@ -50,7 +52,17 @@ public class UserService{
             throw new BadCredentialsException("잘못된 정보입니다.");
         }
 
-        user.setRefreshToken(jwtProvider.createRefreshToken(user));
+
+        String refreshToken = jwtProvider.createRefreshToken(user);
+
+        user.setRefreshToken(refreshToken);
+
+        Token token = new Token(user.getId(), refreshToken, jwtProvider.getRefreshExp());
+
+        tokenRepository.save(token);
+
+//        redisTemplate.opsForValue().set(refreshToken, user.getEmail());
+
 
         return SignResponse.builder()
                 .id(user.getId())
@@ -58,8 +70,7 @@ public class UserService{
                 .gender(user.getGender())
                 .token(TokenDto.builder()
                         .access_token(jwtProvider.createAccessToken(user.getEmail(), Role.USER))
-                        .refresh_token(jwtProvider.createRefreshToken(user))
-                        //.refresh_token(user.getRefreshToken())
+                        .refresh_token(refreshToken)
                         .build())
                 .build();
     }
@@ -163,7 +174,7 @@ public class UserService{
             return null;
         } else {
             if(token.getExpiration() < 10){ // RefreshToken 만료일자가 얼마 남지 않았을 때 만료시간 연장
-                token.setExpiration(1000);
+                token.setExpiration(1000L);
                 tokenRepository.save(token);
             }
 
@@ -173,20 +184,6 @@ public class UserService{
                 return token;
             }
         }
-    }
-
-
-    public SuccessMessage updatePassword(String asIsPassword, String toBePassword, String email) throws Exception {
-
-        User user = userRepository.findByEmail(email).orElseThrow(() -> new Exception("회원 정보가 존재하지 않습니다."));
-
-        if(!user.matchPassword(passwordEncoder, asIsPassword) ) {
-            throw new Exception();
-        }
-
-        user.updatePassword(passwordEncoder, toBePassword);
-
-        return new SuccessMessage();
     }
 
     public TokenDto refreshAccessToken(TokenDto token) throws Exception{
@@ -208,6 +205,66 @@ public class UserService{
         }
     }
 
+    public SuccessMessage updatePassword(String asIsPassword, String newPassword, String email) throws Exception {
 
+        User user = userRepository.findByEmail(email).orElseThrow(() -> new Exception("회원 정보가 존재하지 않습니다."));
+
+        if(!user.matchPassword(passwordEncoder, asIsPassword) ) {
+            throw new Exception();
+        }
+
+        user.updatePassword(passwordEncoder, newPassword);
+
+        return new SuccessMessage();
+    }
+
+    public MailDto mailTemporary(String email) throws Exception{
+
+        userRepository.findByEmail(email).orElseThrow(() -> new Exception("회원 정보가 존재하지 않습니다."));
+
+        String temPassword = getTempPassword(); // 임시 비밀번호 생성
+        MailDto mailDto = new MailDto(); // 메일 작성
+        mailDto.setAddress(email);
+        mailDto.setTitle("피어나 임시 비밀번호 발급");
+        mailDto.setMessage("안녕하세요. 피어나 임시 비밀번호 안내 관련 이메일 입니다." + " 회원님의 임시 비밀번호는 "
+                + temPassword + " 입니다." + "로그인 후에 비밀번호를 변경을 해주세요");
+
+        updateTemPassword(temPassword, email); // 임시 비밀번호로 DB 업데이트
+
+        return mailDto;
+    }
+
+    // 임시 비밀번호 생성
+    public String getTempPassword(){
+        char[] charSet = new char[] { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F',
+                'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z' };
+
+        String str = "";
+
+        int idx;
+        for (int i = 0; i < 10; i++) {
+            idx = (int) (charSet.length * Math.random());
+            str += charSet[idx];
+        }
+        return str;
+    }
+
+    // 임시 비밀번호로 DB 업데이트
+    public void updateTemPassword(String temPassword, String email) throws Exception{
+        User user = userRepository.findByEmail(email).orElseThrow(() -> new Exception("회원 정보가 존재하지 않습니다."));
+
+        String password = temPassword;
+
+        user.updatePassword(passwordEncoder, password);
+    }
+
+    public void mailSend(MailDto mailDto) {
+        SimpleMailMessage message = new SimpleMailMessage();
+        message.setTo(mailDto.getAddress());
+        message.setSubject(mailDto.getTitle());
+        message.setText(mailDto.getMessage());
+
+        javaMailSender.send(message);
+    }
 
 }

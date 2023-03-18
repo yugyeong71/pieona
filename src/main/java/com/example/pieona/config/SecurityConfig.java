@@ -2,6 +2,7 @@ package com.example.pieona.config;
 
 import com.example.pieona.jwt.JwtAuthenticationFilter;
 import com.example.pieona.jwt.JwtProvider;
+import com.example.pieona.oauth2.hadler.OAuth2AuthenticationEntryPoint;
 import com.example.pieona.oauth2.hadler.OAuth2LoginFailureHandler;
 import com.example.pieona.oauth2.hadler.OAuth2LoginSuccessHandler;
 import com.example.pieona.oauth2.service.CustomOAuth2UserService;
@@ -46,7 +47,8 @@ public class SecurityConfig {
             "/",
             "/member/**",
             "/list",
-            "/css/**","/images/**","/js/**","/favicon.ico","/h2-console/**"
+            "/css/**","/images/**","/js/**","/favicon.ico","/h2-console/**",
+            "/findPw"
     };
 
     private static final String[] ADMIN_PERMIT = {
@@ -62,6 +64,7 @@ public class SecurityConfig {
     private final OAuth2LoginSuccessHandler oAuth2LoginSuccessHandler;
     private final OAuth2LoginFailureHandler oAuth2LoginFailureHandler;
     private final CustomOAuth2UserService customOAuth2UserService;
+    private final OAuth2AuthenticationEntryPoint oAuth2AuthenticationEntryPoint;
 
 
     @Bean
@@ -101,15 +104,7 @@ public class SecurityConfig {
                         response.setContentType("text/html; charset=UTF-8");
                         response.getWriter().write("권한이 없는 사용자입니다.");
                     }})
-                .authenticationEntryPoint(new AuthenticationEntryPoint() {
-                    @Override
-                    public void commence(HttpServletRequest request, HttpServletResponse response, AuthenticationException authException) throws IOException, ServletException {
-                        // 인증문제가 발생했을 때 이 부분을 호출한다.
-                        response.setStatus(401);
-                        response.setCharacterEncoding("utf-8");
-                        response.setContentType("text/html; charset=UTF-8");
-                        response.getWriter().write("인증이 필요합니다.");
-                    }})
+                .authenticationEntryPoint(oAuth2AuthenticationEntryPoint)
                     .and().oauth2Login().successHandler(oAuth2LoginSuccessHandler) // 동의하고 계속하기를 눌렀을 때 Handler 설정
                     .failureHandler(oAuth2LoginFailureHandler) // 소셜 로그인 실패 시 핸들러 설정
                     .userInfoEndpoint().userService(customOAuth2UserService);
