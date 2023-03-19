@@ -84,4 +84,10 @@ public class User {
     public boolean matchPassword(PasswordEncoder passwordEncoder, String checkPassword){
         return passwordEncoder.matches(checkPassword, getPassword());
     }
+
+    public void oauth2Update(UpdateUserDto dto){
+        this.nickname = dto.getNickname();
+        this.image = dto.getImage();
+        this.gender = dto.getGender();
+    }
 }

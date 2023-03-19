@@ -2,15 +2,24 @@ package com.example.pieona.user.controller;
 
 import com.example.pieona.common.SecurityUtil;
 import com.example.pieona.common.SuccessMessage;
+import com.example.pieona.jwt.JwtProvider;
+import com.example.pieona.jwt.dto.TokenResponseDto;
+import com.example.pieona.oauth2.CustomOAuth2User;
+import com.example.pieona.user.Role;
 import com.example.pieona.user.dto.*;
 import com.example.pieona.jwt.dto.TokenDto;
+import com.example.pieona.user.entity.User;
+import com.example.pieona.user.repo.UserRepository;
 import com.example.pieona.user.service.UserService;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
+import java.nio.file.attribute.UserPrincipal;
 import java.util.Map;
 
 @RestController
@@ -18,6 +27,30 @@ import java.util.Map;
 public class UserController {
 
     private final UserService userService;
+
+    private final UserRepository userRepository;
+
+    private final JwtProvider jwtProvider;
+
+    @GetMapping("/oauth/login")
+    public ResponseEntity<TokenResponseDto> successLogin(@AuthenticationPrincipal CustomOAuth2User oAuth2User) {
+        String userEmail = oAuth2User.getEmail();
+
+        User user = userRepository.findByEmail(userEmail).orElseThrow(() -> new BadCredentialsException("일치하는 회원 정보가 존재하지 않습니다."));
+
+        String accessToken = jwtProvider.createAccessToken(userEmail, Role.USER);
+        String refreshToken = jwtProvider.createRefreshToken(user);
+
+        user.setRefreshToken(refreshToken);
+
+        TokenResponseDto tokenDto = new TokenResponseDto(user.getId(), accessToken, refreshToken, jwtProvider.getAccessExp(), jwtProvider.getRefreshExp());
+        return new ResponseEntity<>(tokenDto, HttpStatus.OK);
+    }
+
+    @PutMapping("/oauth2/update")
+    public ResponseEntity<SuccessMessage> oauth2SignUp(@RequestBody UpdateUserDto request){
+        return new ResponseEntity<>(userService.oauthUpdateUser(request), HttpStatus.OK);
+    }
 
     @PostMapping("/login")
     public ResponseEntity<SignResponse> login(@RequestBody SignRequest request) {

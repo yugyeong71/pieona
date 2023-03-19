@@ -2,7 +2,7 @@ package com.example.pieona.config;
 
 import com.example.pieona.jwt.JwtAuthenticationFilter;
 import com.example.pieona.jwt.JwtProvider;
-import com.example.pieona.oauth2.hadler.OAuth2AuthenticationEntryPoint;
+import com.example.pieona.security.CustomAuthenticationEntryPoint;
 import com.example.pieona.oauth2.hadler.OAuth2LoginFailureHandler;
 import com.example.pieona.oauth2.hadler.OAuth2LoginSuccessHandler;
 import com.example.pieona.oauth2.service.CustomOAuth2UserService;
@@ -15,12 +15,11 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.builders.WebSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
-import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.access.AccessDeniedHandler;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
@@ -44,15 +43,17 @@ public class SecurityConfig {
             "/refresh",
             "/auth/**",
             "/oauth2/**",
+            "/oauth2/code/**",
             "/",
             "/member/**",
             "/list",
             "/css/**","/images/**","/js/**","/favicon.ico","/h2-console/**",
+            "/resources/**", "/error",
             "/findPw"
     };
 
-    private static final String[] ADMIN_PERMIT = {
-            "/admin/**"
+    private static final String[] GUEST_PERMIT = {
+            "/oauth2/signup"
     };
 
     private static final String[] USER_PERMIT = {
@@ -64,13 +65,22 @@ public class SecurityConfig {
     private final OAuth2LoginSuccessHandler oAuth2LoginSuccessHandler;
     private final OAuth2LoginFailureHandler oAuth2LoginFailureHandler;
     private final CustomOAuth2UserService customOAuth2UserService;
-    private final OAuth2AuthenticationEntryPoint oAuth2AuthenticationEntryPoint;
+    private final CustomAuthenticationEntryPoint customAuthenticationEntryPoint;
 
 
     @Bean
     PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
+
+
+
+    public void configure(WebSecurity web){
+        web.ignoring().requestMatchers("/css/**","/images/**","/js/**","/favicon.ico","/h2-console/**",
+                "/resources/**", "/error");
+    }
+
+
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception{
@@ -87,7 +97,7 @@ public class SecurityConfig {
                 // 조건별로 요청 허용/제한 설정
                 .authorizeHttpRequests()
                 .requestMatchers(ALL_PERMIT).permitAll()
-                .requestMatchers(ADMIN_PERMIT).hasRole("ADMIN")
+                .requestMatchers(GUEST_PERMIT).hasRole("GUEST")
                 .requestMatchers(USER_PERMIT).hasRole("USER")
                 .anyRequest().authenticated()
                 .and()
@@ -95,6 +105,7 @@ public class SecurityConfig {
                 .addFilterBefore(new JwtAuthenticationFilter(jwtProvider, redisTemplate), UsernamePasswordAuthenticationFilter.class)
                 // 에러 핸들링
                 .exceptionHandling()
+                    .authenticationEntryPoint(customAuthenticationEntryPoint)
                 .accessDeniedHandler(new AccessDeniedHandler() {
                     @Override
                     public void handle(HttpServletRequest request, HttpServletResponse response, AccessDeniedException accessDeniedException) throws IOException, ServletException {
@@ -104,11 +115,19 @@ public class SecurityConfig {
                         response.setContentType("text/html; charset=UTF-8");
                         response.getWriter().write("권한이 없는 사용자입니다.");
                     }})
-                .authenticationEntryPoint(oAuth2AuthenticationEntryPoint)
-                    .and().oauth2Login().successHandler(oAuth2LoginSuccessHandler) // 동의하고 계속하기를 눌렀을 때 Handler 설정
-                    .failureHandler(oAuth2LoginFailureHandler) // 소셜 로그인 실패 시 핸들러 설정
+                    .and()
+                    .oauth2Login()
+                    .defaultSuccessUrl("/oauth/login")
+//                    .successHandler(oAuth2LoginSuccessHandler) // 동의하고 계속하기를 눌렀을 때 Handler 설정
                     .userInfoEndpoint().userService(customOAuth2UserService);
+//                    .and().defaultSuccessUrl("/oauth/login");
+//
+
+//                    .failureHandler(oAuth2LoginFailureHandler) // 소셜 로그인 실패 시 핸들러 설정
+//                    .userInfoEndpoint().userService(customOAuth2UserService);
         return http.build();
 
     }
+
+
 }

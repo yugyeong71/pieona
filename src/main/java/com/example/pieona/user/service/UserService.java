@@ -97,7 +97,6 @@ public class UserService{
         return new SuccessMessage();
     }
 
-
     public SuccessMessage logout(String token, HttpServletRequest request){
 
         token = jwtProvider.resolveToken(request);
@@ -148,6 +147,16 @@ public class UserService{
                 .orElseThrow(() -> new RuntimeException("로그인 유저 정보가 없습니다."));
 
         user.update(updateUserDto);
+
+        return new SuccessMessage();
+    }
+
+    public SuccessMessage oauthUpdateUser(UpdateUserDto updateUserDto){
+        User user = userRepository
+                .findByEmail(SecurityUtil.getLoginUsername())
+                .orElseThrow(() -> new RuntimeException("로그인 유저 정보가 없습니다."));
+
+        user.oauth2Update(updateUserDto);
 
         return new SuccessMessage();
     }

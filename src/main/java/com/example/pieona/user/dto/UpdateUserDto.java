@@ -15,4 +15,6 @@ public class UpdateUserDto {
 
     private String image;
 
+    private String gender;
+
 }
