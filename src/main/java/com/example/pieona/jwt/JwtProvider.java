@@ -1,21 +1,22 @@
 package com.example.pieona.jwt;
 
-import com.example.pieona.jwt.repo.TokenRepository;
 import com.example.pieona.user.Role;
 import com.example.pieona.security.JpaUserDetailsService;
 import com.example.pieona.user.entity.User;
+import com.example.pieona.user.service.RedisService;
 import io.jsonwebtoken.*;
 import jakarta.annotation.PostConstruct;
 import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 import io.jsonwebtoken.security.Keys;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.nio.charset.StandardCharsets;
 import java.security.Key;
@@ -24,9 +25,10 @@ import java.util.Date;
 /*
     Token 발급해주는 클래스
  */
-@Getter
+@Getter @Slf4j
 @RequiredArgsConstructor
 @Component
+@Transactional
 public class JwtProvider {
 
     @Value("${jwt.secret.key}")
@@ -40,8 +42,7 @@ public class JwtProvider {
 
     private final JpaUserDetailsService userDetailsService;
 
-    private final TokenRepository tokenRepository;
-
+    private final RedisService redisService;
 
     @PostConstruct
     protected void init(){
@@ -73,15 +74,14 @@ public class JwtProvider {
 
         Date now = new Date();
 
-        Token token = tokenRepository.save(
-                Token.builder()
-                        .id(user.getId())
-                        .refresh_token(Jwts.builder()
-                                .setIssuedAt(now) // 토큰 발행 시간
-                                .setExpiration(new Date(now.getTime() + refreshExp)) // 만료 시간
-                                .signWith(secretKey, SignatureAlgorithm.HS256) // 사용할 알고리즘과 signature 에 들어갈 secretKey
-                                .compact())
-                        .build());
+        Token token = Token.builder()
+                .id(user.getId())
+                .refresh_token(Jwts.builder()
+                        .setIssuedAt(now) // 토큰 발행 시간
+                        .setExpiration(new Date(now.getTime() + refreshExp)) // 만료 시간
+                        .signWith(secretKey, SignatureAlgorithm.HS256) // 사용할 알고리즘과 signature 에 들어갈 secretKey
+                        .compact())
+                .build();
 
         return token.getRefresh_token();
 
@@ -135,7 +135,6 @@ public class JwtProvider {
     }
 
     public Long getExpiration(String accessToken) {
-        //accessToken = accessToken.split(" ")[1].trim();
         Date expiration = Jwts.parserBuilder().setSigningKey(secretKey).build().parseClaimsJws(accessToken).getBody().getExpiration();
 
         Long now = new Date().getTime();

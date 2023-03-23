@@ -11,7 +11,6 @@ import com.example.pieona.jwt.dto.TokenDto;
 import com.example.pieona.user.entity.User;
 import com.example.pieona.user.repo.UserRepository;
 import com.example.pieona.user.service.UserService;
-import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -19,7 +18,6 @@ import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
-import java.nio.file.attribute.UserPrincipal;
 import java.util.Map;
 
 @RestController
@@ -57,11 +55,6 @@ public class UserController {
         return new ResponseEntity<>(userService.login(request), HttpStatus.OK);
     }
 
-    @PostMapping("/user/logout")
-    public SuccessMessage logout(String token, HttpServletRequest request){
-        userService.logout(token, request);
-        return new SuccessMessage();
-    }
 
     @PostMapping("/signup")
     public ResponseEntity<SuccessMessage> signUp(@RequestBody SignRequest request) throws Exception {
@@ -95,7 +88,7 @@ public class UserController {
 
     @GetMapping("/refresh")
     public ResponseEntity<TokenDto> refresh(@RequestBody TokenDto token) throws Exception{
-        return new ResponseEntity<>(userService.refreshAccessToken(token), HttpStatus.OK);
+        return new ResponseEntity<>(userService.reissueAtk(token), HttpStatus.OK);
     }
 
     @PutMapping("/user/password")

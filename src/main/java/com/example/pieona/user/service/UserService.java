@@ -2,31 +2,31 @@ package com.example.pieona.user.service;
 
 import com.example.pieona.common.SecurityUtil;
 import com.example.pieona.common.SuccessMessage;
+import com.example.pieona.jwt.Token;
 import com.example.pieona.user.Role;
 import com.example.pieona.user.dto.*;
 import com.example.pieona.jwt.dto.TokenDto;
 import com.example.pieona.user.entity.Authority;
 import com.example.pieona.user.entity.User;
 import com.example.pieona.jwt.JwtProvider;
-import com.example.pieona.jwt.Token;
-import com.example.pieona.jwt.repo.TokenRepository;
 import com.example.pieona.user.repo.UserRepository;
-import jakarta.servlet.http.HttpServletRequest;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.nimbusds.oauth2.sdk.TokenResponse;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
-import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
-import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Collections;
-import java.util.concurrent.TimeUnit;
+import java.util.Objects;
 
 @Service
+@Slf4j
 @RequiredArgsConstructor
 @Transactional
 public class UserService{
@@ -37,11 +37,11 @@ public class UserService{
 
     private final JwtProvider jwtProvider;
 
-    private final TokenRepository tokenRepository;
+    private final JavaMailSender javaMailSender;
 
     private final RedisTemplate redisTemplate;
 
-    private final JavaMailSender javaMailSender;
+
 
 
     public SignResponse login(SignRequest request) {
@@ -57,12 +57,7 @@ public class UserService{
 
         user.setRefreshToken(refreshToken);
 
-        Token token = new Token(user.getId(), refreshToken, jwtProvider.getRefreshExp());
-
-        tokenRepository.save(token);
-
-//        redisTemplate.opsForValue().set(refreshToken, user.getEmail());
-
+        redisTemplate.opsForValue().set(refreshToken, user.getEmail());
 
         return SignResponse.builder()
                 .id(user.getId())
@@ -96,29 +91,6 @@ public class UserService{
 
         return new SuccessMessage();
     }
-
-    public SuccessMessage logout(String token, HttpServletRequest request){
-
-        token = jwtProvider.resolveToken(request);
-
-        if (!jwtProvider.validateToken(token)){
-            throw new IllegalArgumentException("로그아웃 : 유효하지 않은 토큰입니다.");
-        }
-
-        token = token.split(" ")[1].trim();
-        Authentication authentication = jwtProvider.getAuthentication(token);
-
-        if (redisTemplate.opsForValue().get("RT:" + authentication.getName())!=null){
-            // Refresh Token을 삭제
-            redisTemplate.delete("RT:" + authentication.getName());
-        }
-
-        Long expiration = jwtProvider.getExpiration(token);
-        redisTemplate.opsForValue().set(token,"logout",expiration,TimeUnit.MILLISECONDS);
-
-        return new SuccessMessage();
-    }
-
 
     public boolean existEmail(String email){
         return userRepository.existsByEmail(email);
@@ -174,44 +146,24 @@ public class UserService{
         return new SuccessMessage();
     }
 
+    public TokenDto reissueAtk(TokenDto tokenDto) throws Exception {
 
-    public Token vaildRefreshToken(User user, String refreshToken) throws Exception{
-        Token token = tokenRepository.findById(user.getId()).orElseThrow(() -> new Exception("만료된 계정입니다. 로그인을 다시 시도하세요."));
-
-        // 해당 유저의 Refresh 토큰 만료 : Redis에 해당 유저의 토큰이 존재하지 않음
-        if(token.getRefresh_token() == null){
-            return null;
-        } else {
-            if(token.getExpiration() < 10){ // RefreshToken 만료일자가 얼마 남지 않았을 때 만료시간 연장
-                token.setExpiration(1000L);
-                tokenRepository.save(token);
-            }
-
-            if (!token.getRefresh_token().equals(refreshToken)){ // 토큰이 같은지 비교
-                return null;
-            } else {
-                return token;
-            }
-        }
-    }
-
-    public TokenDto refreshAccessToken(TokenDto token) throws Exception{
-
-        String email = jwtProvider.getEmail(token.getAccess_token());
+        String email = jwtProvider.getEmail(tokenDto.getAccess_token());
 
         User user = userRepository.findByEmail(email).orElseThrow(() ->
                 new BadCredentialsException("잘못된 계정 정보입니다."));
 
-        Token refreshToken = vaildRefreshToken(user, token.getRefresh_token());
+        String refreshToken = jwtProvider.createRefreshToken(user);
 
-        if(refreshToken != null){
-            return TokenDto.builder()
-                    .access_token(jwtProvider.createAccessToken(email, Role.USER))
-                    .refresh_token(jwtProvider.createRefreshToken(user))
-                    .build();
-        } else {
-            throw new Exception("로그인을 해주세요.");
-        }
+        user.setRefreshToken(refreshToken);
+
+        redisTemplate.opsForValue().set(refreshToken, user.getEmail());
+
+        return TokenDto.builder()
+                .access_token(jwtProvider.createAccessToken(user.getEmail(), Role.USER))
+                .refresh_token(refreshToken)
+                .build();
+
     }
 
     public SuccessMessage updatePassword(String asIsPassword, String newPassword, String email) throws Exception {

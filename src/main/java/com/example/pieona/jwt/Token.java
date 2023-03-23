@@ -12,7 +12,6 @@ import org.springframework.data.redis.core.TimeToLive;
 import java.util.concurrent.TimeUnit;
 
 @Getter @Builder
-@RedisHash("refreshToken")
 @AllArgsConstructor @NoArgsConstructor
 public class Token {
 

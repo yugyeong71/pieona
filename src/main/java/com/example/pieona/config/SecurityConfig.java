@@ -3,8 +3,6 @@ package com.example.pieona.config;
 import com.example.pieona.jwt.JwtAuthenticationFilter;
 import com.example.pieona.jwt.JwtProvider;
 import com.example.pieona.security.CustomAuthenticationEntryPoint;
-import com.example.pieona.oauth2.hadler.OAuth2LoginFailureHandler;
-import com.example.pieona.oauth2.hadler.OAuth2LoginSuccessHandler;
 import com.example.pieona.oauth2.service.CustomOAuth2UserService;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -62,8 +60,6 @@ public class SecurityConfig {
     };
 
     private final JwtProvider jwtProvider;
-    private final OAuth2LoginSuccessHandler oAuth2LoginSuccessHandler;
-    private final OAuth2LoginFailureHandler oAuth2LoginFailureHandler;
     private final CustomOAuth2UserService customOAuth2UserService;
     private final CustomAuthenticationEntryPoint customAuthenticationEntryPoint;
 

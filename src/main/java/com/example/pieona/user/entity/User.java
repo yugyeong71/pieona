@@ -90,4 +90,5 @@ public class User {
         this.image = dto.getImage();
         this.gender = dto.getGender();
     }
+
 }
