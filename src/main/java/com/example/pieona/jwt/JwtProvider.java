@@ -3,7 +3,6 @@ package com.example.pieona.jwt;
 import com.example.pieona.user.Role;
 import com.example.pieona.security.JpaUserDetailsService;
 import com.example.pieona.user.entity.User;
-import com.example.pieona.user.service.RedisService;
 import io.jsonwebtoken.*;
 import jakarta.annotation.PostConstruct;
 import jakarta.servlet.http.HttpServletRequest;
@@ -41,8 +40,6 @@ public class JwtProvider {
     private final long refreshExp = 7 * 24 * 60 * 60 * 1000L; // 리프레시 토큰 만료 시간 : 7시간
 
     private final JpaUserDetailsService userDetailsService;
-
-    private final RedisService redisService;
 
     @PostConstruct
     protected void init(){
