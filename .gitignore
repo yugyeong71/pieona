@@ -26,7 +26,7 @@ out/
 !**/src/main/**/out/
 !**/src/test/**/out/
 application.yml
-AuthKey_T2LGUC65FS.p8
+key/AuthKey_T2LGUC65FS.p8
 
 ### NetBeans ###
 /nbproject/private/
