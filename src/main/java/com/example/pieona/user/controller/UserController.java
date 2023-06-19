@@ -79,8 +79,8 @@ public class UserController {
         return ResponseEntity.ok(userService.existNickname(nickname));
     }
 
-    @GetMapping("/member/{id}")
-    public ListUser list(@PathVariable Long id){
+    @GetMapping("/member/list")
+    public ListUser list(@RequestBody Long id){
         return userService.listUser(id);
     }
 
